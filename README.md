@@ -11,7 +11,7 @@ A 32bit operating system for i686 systems.
 ### The easy way
 
 1. Install the [Nix package manager](https://nixos.org/download/).
-2. Run this command: `nix develop ./flake.nix`
+2. Run this command: `nix --experimental-features "nix-command flakes" develop ./flake.nix`
 
 This will give you a shell with all that is required to build and run this OS on a linux system.
 It takes some time to build the cross compiler so you will have to be patient.
