@@ -49,9 +49,9 @@ void TerminalPutEntry(const char c, const u8 color, const u8 column, const u8 ro
 
 void TerminalPutPrompt(void)
 {
-	static const char* prompt = "$ ";
+	static constexpr u8 promptLength = 2;
+	static constexpr char prompt[promptLength] = "$ ";
 	const u8 promptColor = VgaTextModeAttribute(VgaTextModeColorRed, VgaTextModeColorBlack);
-	static const u8 promptLength = 2;
 
 	for (u16 i = 0; i < promptLength; ++i) {
 		TerminalPutEntry(prompt[i], promptColor, i, VgaTextMode.row);
@@ -99,7 +99,7 @@ void TerminalPutString(const char* string)
 	}
 }
 
-void TerminalScrollDown()
+void TerminalScrollDown(void)
 {
 	for (u8 y = 0; y < VgaTextMode.height - 1; ++y) {
 		for (u8 x = 0; x < VgaTextMode.width; ++x) {

@@ -31,4 +31,4 @@ void TerminalPutPrompt(void);
 void TerminalPutChar(const char c);
 void TerminalPutString(const char* string);
 
-void TerminalScrollDown();
+void TerminalScrollDown(void);

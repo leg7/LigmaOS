@@ -1,7 +1,7 @@
 {
   description = "Environment to build and test an operating system";
 
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
   outputs = { nixpkgs, ... }:
   let system = "x86_64-linux";
@@ -19,6 +19,7 @@
         gnumake
         qemu
         # debug
+        clang-tools_18
         gdb
         gf
         fish
