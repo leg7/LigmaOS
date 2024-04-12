@@ -1,0 +1,15 @@
+CompileFlags:
+  Add: [
+    -I/persistent/home/user/.local/bin/LigmaOS/src/kernel/library,
+    -I/persistent/home/user/.local/bin/LigmaOS/src/libc,
+    -xc,
+    -std=c2x,
+    -ffreestanding,
+    -nostdlib,
+    -Wall,
+    -Wextra,
+    -Wpedantic,
+  ]
+
+Diagnostics:
+  Suppress: [ undeclared_var_use, unknown_typename, expected_semi_declaration, -Wgnu-binary-literal ]

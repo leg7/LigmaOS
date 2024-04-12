@@ -20,7 +20,7 @@ all: $(OBJ) | $(MULTIBOOT_HEADER_OBJ)
 
 $(BUILD_DIR)/%.o: $(SRCDIR)/%.c
 	@mkdir -p $(shell dirname $@)
-	i686-elf-gcc -c $< -o $@ -std=c2x -ffreestanding -nostdlib -ggdb -Wall -Wextra -Wpedantic
+	i686-elf-gcc -c $< -o $@ -std=c2x -ffreestanding -nostdlib -I './kernel/library' -I './libc' -ggdb -Wall -Wextra -Wpedantic
 
 $(MULTIBOOT_HEADER_OBJ): $(MULTIBOOT_HEADER)
 	i686-elf-as $< -o $@

@@ -1,5 +1,5 @@
 #include "VgaTextMode.h"
-#include "../libc/string/string.h"
+#include <string.h>
 
 struct
 {
@@ -14,7 +14,6 @@ VgaTextMode = {
 	VgaTextModeColorLightGrey | VgaTextModeColorBlack << 4,
 	(u16*)(0xB8000),
 };
-
 
 u8 VgaTextModeAttribute
 (const enum VgaTextModeColor foreground, const enum VgaTextModeColor background)
@@ -62,7 +61,6 @@ void TerminalPutPrompt(void)
 
 	VgaTextMode.column = promptLength;
 }
-
 
 void TerminalPutChar(const char c)
 {

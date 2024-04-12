@@ -1,6 +1,6 @@
-#include "Types.h"
+#include <Types.h>
 
-enum VgaTextModeColor
+enum VgaTextModeColor : u8
 {
 	VgaTextModeColorBlack,
 	VgaTextModeColorBlue,
