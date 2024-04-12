@@ -6,7 +6,7 @@
 #error "This needs to be compiled with an ix86-elf compiler"
 #endif
 
-#include "VgaTextMode.h"
+#include "graphics/VgaTextMode.h"
 
 void KernelMain(void)
 {
