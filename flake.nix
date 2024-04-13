@@ -18,7 +18,9 @@
         # build/run
         gnumake
         qemu
+        nasm
         # debug
+        halloy
         clang-tools_18
         gdb
         gf
