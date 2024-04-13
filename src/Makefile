@@ -38,7 +38,7 @@ $(OBJ_DIR)/%.nasm.o: $(SRC_DIR)/%.nasm
 	nasm $< -o $@ $(NASM_FLAGS)
 
 $(OBJ_DIR)/%.s.o: $(SRC_DIR)/%.s
-	i686-elf-as $< -o $@
+	i686-elf-as -m32 $< -o $@
 
 clean:
 	rm -rf build

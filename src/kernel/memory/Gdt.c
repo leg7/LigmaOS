@@ -34,7 +34,7 @@ struct GdtEntry Gdt1[] = {
 };
 
 struct GdtDescriptor Gdt = {
-	.gdt = Gdt1, .size = sizeof(Gdt1),
+	.gdt = Gdt1, .size = sizeof(Gdt1) - 1,
 };
 
 void GdtInitializei686(void)

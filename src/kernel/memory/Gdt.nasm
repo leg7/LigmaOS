@@ -18,7 +18,7 @@ GdtLoadi686:
 .reloadCs:
 
 	; reload data segments
-	mov ax, [ebp + 14]
+	mov ax, [ebp + 16]
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
