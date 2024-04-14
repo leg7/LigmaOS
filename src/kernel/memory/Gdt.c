@@ -1,19 +1,6 @@
 #include "Gdt.h"
 
-#define GdtEntry(base, limit, m_access, m_flags) { \
-	.baseLow                 = base & 0x00'00'FF'FF, \
-	.baseMiddle              = (base & 0x00'FF'00'00) >> 16, \
-	.baseHigh                = (base & 0xFF'00'00'00) >> 20, \
-	\
-	.limitLow                = limit & 0x0'FF'FF, \
-	.limitHigh               = (limit & 0xF'00'00) >> 16, \
-	\
-	.access = m_access, \
-	\
-	.flags = m_flags \
-}
-
-constexpr struct GdtEntry Gdt1[] = {
+constexpr struct GdtEntry Gdt[3] = {
 	GdtEntry(0, 0, 0, 0),
 
 	// Code segment spanning all of the addressable memory
@@ -33,9 +20,9 @@ constexpr struct GdtEntry Gdt1[] = {
 	),
 };
 
-struct GdtDescriptor Gdt = {
-	.gdt = Gdt1,
-	.size = sizeof(Gdt1) - 1,
+struct GdtDescriptor GdtDescriptor = {
+	.gdt = Gdt,
+	.size = sizeof(Gdt) - 1,
 };
 
 void GdtInitializei686(void)
@@ -43,5 +30,6 @@ void GdtInitializei686(void)
 	// 8 and 16 because a GDT entry is 8 bytes
 	// so the code entry is located 8 bytes in and the
 	// data entry 16 bytes in the table
-	GdtLoadi686(&Gdt, 8, 16);
+	GdtLoadi686(&GdtDescriptor, 8, 16);
 }
+

@@ -1,9 +1,18 @@
+#pragma once
 #include <Types.h>
 
 /* 32bit GDT table implementation for i686
- * Although we won't be using segmentation, but virtual memory and paging
- * setting this up is necessary to handle interrupts.
+ * Although we won't be using segmentation, but virtual memory and paging,
+ * setting this up is necessary to handle interrupts because the IDT will use the GDT
+ * to look up ISRs.
  * We will configure it so that segments span the whole 4GiB of addressable memory */
+
+// To be used with the `lgdt` function in asm whose arument is a pointer to a GDT descriptor
+struct [[gnu::packed]] GdtDescriptor
+{
+	const u16 size; 		// sizeof(gdt) - 1
+	const struct GdtEntry* gdt;
+};
 
 struct [[gnu::packed]] GdtEntry
 {
@@ -15,6 +24,21 @@ struct [[gnu::packed]] GdtEntry
 	u8 flags : 4;	// defined like access
 	u8 baseHigh;
 };
+
+// Base u32, limit u20, use enum for the rest
+#define GdtEntry(base, limit, _access, _flags) \
+{ \
+	.baseLow                 = base & 0x00'00'FF'FF, \
+	.baseMiddle              = (base & 0x00'FF'00'00) >> 16, \
+	.baseHigh                = (base & 0xFF'00'00'00) >> 20, \
+	\
+	.limitLow                = limit & 0x0'FF'FF, \
+	.limitHigh               = (limit & 0xF'00'00) >> 16, \
+	\
+	.access = _access, \
+	\
+	.flags = _flags \
+}
 
 // Used to define the access byte of a GdtEntry and the flags quartet
 enum : u8
@@ -48,7 +72,6 @@ enum : u8
 
 
 	// --- Flags quartet ---
-
 	// bit 3
 	GdtEntryFlagsGranularity1B     = 0b0'000,
 	GdtEntryFlagsGranularity4K     = 0b1'000,
@@ -61,13 +84,19 @@ enum : u8
 	// bit 0 is reserved by the cpu
 };
 
-
-// To be used with the `lgdt` function in asm whose arument is a pointer to a GDT descriptor
-struct [[gnu::packed]] GdtDescriptor
+// Used to select a GdtEntry in a Gdt we will only need this to get the address of ISRs in the IDT
+struct [[gnu::packed]] GdtEntrySelector
 {
-	const u16 size; 		// sizeof(gdt) - 1
-	const struct GdtEntry* gdt;
+	u16 index : 10;
+	u8 _zero : 4;
+	u8 ring : 2;
 };
+
+#define GdtEntrySelector(_index, _ring) \
+{ \
+	.index = _index, \
+	.ring = _ring, \
+}
 
 // Written in assembly see Gdt.asm
 [[gnu::cdecl]]

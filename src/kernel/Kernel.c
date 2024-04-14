@@ -8,6 +8,7 @@
 
 #include "graphics/VgaTextMode.h"
 #include "memory/Gdt.h"
+#include "memory/Idt.h"
 
 void KernelMain(void)
 {
@@ -53,4 +54,5 @@ void KernelMain(void)
 	// TerminalPutString("Hello, kernel World! 39\n");
 
 	GdtInitializei686();
+	IdtInitializei686();
 }
