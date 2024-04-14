@@ -13,7 +13,7 @@
 	.flags = m_flags \
 }
 
-struct GdtEntry Gdt1[] = {
+constexpr struct GdtEntry Gdt1[] = {
 	GdtEntry(0, 0, 0, 0),
 
 	// Code segment spanning all of the addressable memory

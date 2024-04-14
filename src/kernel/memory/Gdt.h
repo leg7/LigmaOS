@@ -65,13 +65,13 @@ enum : u8
 // To be used with the `lgdt` function in asm whose arument is a pointer to a GDT descriptor
 struct [[gnu::packed]] GdtDescriptor
 {
-	u16 size; 		// sizeof(gdt) - 1
-	struct GdtEntry* gdt;
+	const u16 size; 		// sizeof(gdt) - 1
+	const struct GdtEntry* gdt;
 };
 
 // Written in assembly see Gdt.asm
 [[gnu::cdecl]]
-void GdtLoadi686(struct GdtDescriptor* descriptor, u16 codeSegmentStartInGdt, u16 dataSegmentStartinGdt);
+void GdtLoadi686(const struct GdtDescriptor* descriptor, const u16 codeSegmentStartInGdt, const u16 dataSegmentStartinGdt);
 
 void GdtInitializei686(void);
 
