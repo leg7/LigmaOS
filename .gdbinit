@@ -6,4 +6,4 @@ end
 set disassembly-flavor intel
 set architecture i8086
 target remote localhost:26000
-file isodir/boot/os.bin
+file src/isodir/boot/os.bin

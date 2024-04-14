@@ -1,8 +1,8 @@
-OBJ_DIR=./build
-SRC_DIR = .
+OBJ_DIR= ./build
+SRC_DIR = ./src
 
 CC = i686-elf-gcc
-CFLAGS = -std=c2x -ffreestanding -nostdlib -I './kernel/library' -I './libc' -Wall -Wextra -Wpedantic -ggdb
+CFLAGS = -std=c2x -ffreestanding -nostdlib -I '$(SRC_DIR)/kernel/library' -I '$(SRC_DIR)/libc' -Wall -Wextra -Wpedantic -ggdb
 LDFLAGS = -ffreestanding -nostdlib  -lgcc -ggdb
 SRC_C := $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJ_C := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_C))
@@ -15,7 +15,7 @@ SRC_GAS := $(shell find -type f -name '*.s')
 OBJ_GAS := $(patsubst $(SRC_GAS)%.s, $(OBJ_DIR)%.s.o, $(SRC_GAS))
 
 # Name is hardcoded in /isodir/grub/grub.cfg
-OS = isodir/boot/os.bin
+OS = $(SRC_DIR)/isodir/boot/os.bin
 OS_ISO = $(OBJ_DIR)/os.iso
 
 .PHONY: clean
@@ -27,7 +27,7 @@ $(OS_ISO): $(OBJ_C) $(OBJ_NASM) $(OBJ_GAS)
 	$(CC) -T linker.ld $(OBJ_C) $(OBJ_NASM) $(OBJ_GAS) -o $(OS) $(LDFLAGS)
 	@printf "\n"
 	grub-file --is-x86-multiboot $(OS)
-	grub-mkrescue -o $(OS_ISO) isodir
+	grub-mkrescue -o $(OS_ISO) $(SRC_DIR)/isodir
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(shell dirname $@)
@@ -41,7 +41,8 @@ $(OBJ_DIR)/%.s.o: $(SRC_DIR)/%.s
 	i686-elf-as -m32 $< -o $@
 
 clean:
-	rm -rf build
+	rm -rf $(OBJ_DIR)
+	rm $(OS)
 
 run: all
 	qemu-system-i386 -cdrom $(OS_ISO)

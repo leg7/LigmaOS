@@ -14,7 +14,7 @@ A 32bit operating system for i686 systems.
 2. Run this command: `nix --experimental-features "nix-command flakes" develop ./flake.nix`
 
 This will give you a shell with all that is required to build and run this OS on a linux system.
-It takes some time to build the cross compiler so you will have to be patient.
+It might take some time to build the cross compiler so you will have to be patient.
 
 ### The hard way
 
@@ -36,7 +36,11 @@ If you don't have a cross compiler the operating system will not work.
 
 ## Building and running
 
-We use gnumake to automate the build of the OS and qemu to run it in a VM.
-To run the OS use this command from the src directory
+We use **gnu make** to automate the build of the OS and **qemu** to run it in a VM.
 
-`make run`
+To build the OS you can run this command from the root of the repo `make`.
+
+To build and run the OS you can use this command from the root of the repo `make run`.
+
+To debug the OS open two terminals in this repo. In both of them make sure you are in the nix-shell dev environment.
+Then in one of them run `make debug` and in the other run `gf2`. Now you can set a breakpoint in the debugger and continue the program.

@@ -21,12 +21,12 @@
         nasm
         # debug
         halloy
-        clang-tools_18
         gdb
         gf
         fish
       ];
 
+      # Cross compiler
       shellHook = ''
       nix-shell crossShell.nix
       '';
