@@ -1,6 +1,20 @@
 #include <Types.h>
 
-// GDT table implementation used to handle interrupts later
+/* 32bit GDT table implementation for i686
+ * Although we won't be using segmentation, but virtual memory and paging
+ * setting this up is necessary to handle interrupts.
+ * We will configure it so that segments span the whole 4GiB of addressable memory */
+
+struct [[gnu::packed]] GdtEntry
+{
+	u16 limitLow;
+	u16 baseLow;
+	u8 baseMiddle;
+	u8 access; 		// defined with bitwise OR operations on the members of the anonymous enum below
+	u8 limitHigh : 4;
+	u8 flags : 4;	// defined like access
+	u8 baseHigh;
+};
 
 // Used to define the access byte of a GdtEntry and the flags quartet
 enum : u8
@@ -47,16 +61,6 @@ enum : u8
 	// bit 0 is reserved by the cpu
 };
 
-struct [[gnu::packed]] GdtEntry
-{
-	u16 limitLow;
-	u16 baseLow;
-	u8 baseMiddle;
-	u8 access; 		// defined with bitwise OR operations on the members of the anonymous enum above
-	u8 limitHigh : 4;
-	u8 flags : 4;	// defined like access
-	u8 baseHigh;
-};
 
 // To be used with the `lgdt` function in asm whose arument is a pointer to a GDT descriptor
 struct [[gnu::packed]] GdtDescriptor
@@ -65,7 +69,7 @@ struct [[gnu::packed]] GdtDescriptor
 	struct GdtEntry* gdt;
 };
 
-// Written in assembly see gdt.asm
+// Written in assembly see Gdt.asm
 [[gnu::cdecl]]
 void GdtLoadi686(struct GdtDescriptor* descriptor, u16 codeSegmentStartInGdt, u16 dataSegmentStartinGdt);
 
