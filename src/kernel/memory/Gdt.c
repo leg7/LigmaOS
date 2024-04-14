@@ -20,7 +20,7 @@ struct GdtEntry Gdt1[] = {
 	GdtEntry(
 		0,
 		0xFF'FF'FF'FF,
-		GdtEntryAccessPresent | GdtEntryAccessRing0 | GdtEntryAccessCode | GdtEntryAccessCodeReadable | GdtEntryAccessAccessed,
+		GdtEntryAccessPresent | GdtEntryAccessRing0 | GdtEntryAccessCode | GdtEntryAccessCodeReadable,
 		GdtEntryFlagsSegmentWidth32Bit | GdtEntryFlagsGranularity4K
 	),
 
@@ -40,5 +40,7 @@ struct GdtDescriptor Gdt = {
 void GdtInitializei686(void)
 {
 	// 8 and 16 because a GDT entry is 8 bytes
+	// so the code entry is located 8 bytes in and the
+	// data entry 16 bytes in the table
 	GdtLoadi686(&Gdt, 8, 16);
 }

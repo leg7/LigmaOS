@@ -17,7 +17,7 @@ enum : u8
 
 	// bit 3-4
 	GdtEntryAccessSystem            = 0b000'00'000,
-	GdtEntryAccessData              = 0b000'01'000,
+	GdtEntryAccessData              = 0b000'10'000,
 	GdtEntryAccessCode              = 0b000'11'000,
 
 	// bit 2
@@ -34,16 +34,17 @@ enum : u8
 
 
 	// --- Flags quartet ---
-	// bit 3 is reserved by the cpu
 
-	// bit 2
-	GdtEntryFlagsGranularity1B     = 0b0'00,
-	GdtEntryFlagsGranularity4K     = 0b1'00,
+	// bit 3
+	GdtEntryFlagsGranularity1B     = 0b0'000,
+	GdtEntryFlagsGranularity4K     = 0b1'000,
 
-	// bit 0-1
-	GdtEntryFlagsSegmentWidth16Bit = 0b0'00,
-	GdtEntryFlagsSegmentWidth32Bit = 0b0'01,
-	GdtEntryFlagsSegmentWidth64Bit = 0b0'11,
+	// bit 2-1
+	GdtEntryFlagsSegmentWidth16Bit = 0b0'00'0,
+	GdtEntryFlagsSegmentWidth32Bit = 0b0'10'0,
+	GdtEntryFlagsSegmentWidth64Bit = 0b0'01'0, // don't use for sys segments
+
+	// bit 0 is reserved by the cpu
 };
 
 struct [[gnu::packed]] GdtEntry
