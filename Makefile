@@ -2,7 +2,7 @@ OBJ_DIR= ./build
 SRC_DIR = ./src
 
 CC = i686-elf-gcc
-CFLAGS = -std=c2x -ffreestanding -nostdlib -I '$(SRC_DIR)/kernel/library' -I '$(SRC_DIR)/libc' -Wall -Wextra -Wpedantic -ggdb
+CFLAGS = -std=c2x -ffreestanding -nostdlib -I '$(SRC_DIR)/kernel/library' -I '$(SRC_DIR)/libc' -Wall -Wextra -Wpedantic -Wvla -Wimplicit-fallthrough -fanalyzer -ggdb
 LDFLAGS = -ffreestanding -nostdlib  -lgcc -ggdb
 SRC_C := $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJ_C := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_C))
@@ -11,8 +11,8 @@ NASM_FLAGS := -gdwarf -f elf32
 SRC_NASM := $(shell find $(SRC_DIR) -type f -name '*.nasm')
 OBJ_NASM := $(patsubst $(SRC_DIR)/%.nasm, $(OBJ_DIR)/%.nasm.o, $(SRC_NASM))
 
-SRC_GAS := $(shell find -type f -name '*.s')
-OBJ_GAS := $(patsubst $(SRC_GAS)%.s, $(OBJ_DIR)%.s.o, $(SRC_GAS))
+SRC_GAS := $(shell find $(SRC_DIR) -type f -name '*.s')
+OBJ_GAS := $(patsubst $(SRC_DIR)%.s, $(OBJ_DIR)%.s.o, $(SRC_GAS))
 
 # Name is hardcoded in /isodir/grub/grub.cfg
 OS = $(SRC_DIR)/isodir/boot/os.bin
@@ -38,7 +38,7 @@ $(OBJ_DIR)/%.nasm.o: $(SRC_DIR)/%.nasm
 	nasm $< -o $@ $(NASM_FLAGS)
 
 $(OBJ_DIR)/%.s.o: $(SRC_DIR)/%.s
-	i686-elf-as -m32 $< -o $@
+	i686-elf-as $< -o $@
 
 clean:
 	rm -rf $(OBJ_DIR)
