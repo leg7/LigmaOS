@@ -1,4 +1,4 @@
-#include "VgaTextMode.h"
+#include "vgaTextMode.h"
 #include <string.h>
 
 struct

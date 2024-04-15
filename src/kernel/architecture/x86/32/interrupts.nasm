@@ -1,5 +1,6 @@
 [bits 32]
 global GdtLoadi686
+global IdtLoadi686
 
 GdtLoadi686:
 	push ebp
@@ -29,4 +30,7 @@ GdtLoadi686:
 	pop ebp
 	ret
 
+IdtLoadi686:
+	lidt [esp + 8]
+	ret
 

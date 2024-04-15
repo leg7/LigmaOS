@@ -2,13 +2,12 @@
 #error "You are not using a cross compiler dumbass"
 #endif
 
-#if !defined(__i386__)
+#if !defined(__i686__)
 #error "This needs to be compiled with an ix86-elf compiler"
 #endif
 
-#include "graphics/VgaTextMode.h"
-#include "memory/Gdt.h"
-#include "memory/Idt.h"
+#include "graphics/vgaTextMode.h"
+#include "architecture/x86/32/interrupts.h"
 
 void KernelMain(void)
 {
