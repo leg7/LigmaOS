@@ -8,12 +8,19 @@
 
 #include "graphics/vgaTextMode.h"
 #include "architecture/x86/32/interrupts.h"
+#include <stdio.h>
 
 void KernelMain(void)
 {
+	GdtInitializeX86();
+	IdtLoadX86();
+
 	TerminalInitialize();
-	// TerminalPutString("Hello, kernel World! 1\n");
-	// TerminalPutString("Hello, kernel World! 2\n");
+	TerminalPutString("Hello, kernel World! 1\n");
+	__asm("int $255");
+	// __asm("mov $0, %eax");
+	// __asm("div %eax");
+	TerminalPutString("Hello, kernel World! 2\n");
 	// TerminalPutString("Hello, kernel World! 3\n");
 	// TerminalPutString("Hello, kernel World! 4\n");
 	// TerminalPutString("Hello, kernel World! 5\n");
@@ -52,6 +59,4 @@ void KernelMain(void)
 	// TerminalPutString("Hello, kernel World! 38\n");
 	// TerminalPutString("Hello, kernel World! 39\n");
 
-	GdtInitializei686();
-	IdtInitializei686();
 }

@@ -8,8 +8,8 @@ SRC_C := $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJ_C := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_C))
 
 NASM_FLAGS := -gdwarf -f elf32
-SRC_NASM := $(shell find $(SRC_DIR) -type f -name '*.nasm')
-OBJ_NASM := $(patsubst $(SRC_DIR)/%.nasm, $(OBJ_DIR)/%.nasm.o, $(SRC_NASM))
+SRC_NASM := $(shell find $(SRC_DIR) -type f -name '*.nasm.asm')
+OBJ_NASM := $(patsubst $(SRC_DIR)/%.nasm.asm, $(OBJ_DIR)/%.nasm.o, $(SRC_NASM))
 
 SRC_GAS := $(shell find $(SRC_DIR) -type f -name '*.s')
 OBJ_GAS := $(patsubst $(SRC_DIR)%.s, $(OBJ_DIR)%.s.o, $(SRC_GAS))
@@ -33,7 +33,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(shell dirname $@)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-$(OBJ_DIR)/%.nasm.o: $(SRC_DIR)/%.nasm
+$(OBJ_DIR)/%.nasm.o: $(SRC_DIR)/%.nasm.asm
 	@mkdir -p $(shell dirname $@)
 	nasm $< -o $@ $(NASM_FLAGS)
 

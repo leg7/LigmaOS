@@ -84,39 +84,13 @@ enum : u8
 	// bit 0 is reserved by the cpu
 };
 
-// Used to select a GdtEntry in a Gdt we will only need this to get the address of ISRs in the IDT
-struct [[gnu::packed]] GdtEntrySelector
-{
-	u16 index : 10;
-	u8 _zero : 4;
-	u8 ring : 2;
-};
-
-#define GdtEntrySelector(_index, _ring) \
-{ \
-	.index = _index, \
-	.ring = _ring, \
-}
-
 // Written in assembly see Gdt.asm
 [[gnu::cdecl]]
-void GdtLoadi686(const struct GdtDescriptor* descriptor, const u16 codeSegmentStartInGdt, const u16 dataSegmentStartinGdt);
+void GdtLoadX86(const struct GdtDescriptor* descriptor, const u16 codeSegmentStartInGdt, const u16 dataSegmentStartinGdt);
+void GdtInitializeX86(void);
 
-void GdtInitializei686(void);
 
-
-/* ----- IDT -----
- * The IDT is very similar to the GDT
- */
-
-#define IdtSize 256
-
-// To be used with the `lidt` asm function whose argument is a pointer to an IdtDescriptor
-struct [[gnu::packed]] IdtDescriptor
-{
-	const u16 size; // sizeof(Idt) - 1
-	const struct IdtGate *idt;
-};
+/* ----- IDT ----- */
 
 enum IdtGateType : u8
 {
@@ -131,7 +105,7 @@ enum IdtGateType : u8
 struct [[gnu::packed]] IdtGate
 {
 	u16 isrAddressLow;
-	struct GdtEntrySelector gdtEntrySelector;
+	u16 _gdtKernelCodeSegment; // hardcoded
 	u8 _zero;
 	enum IdtGateType type : 4;
 	u8 _zero2 : 1;
@@ -140,23 +114,7 @@ struct [[gnu::packed]] IdtGate
 	u16 isrAddressHigh;
 };
 
-// isrAddress u32, segmentSelector
-#define IdtGate(isrAddress, _gdtEntrySelector, _type, _ring) \
-{ \
-	.isrAddressLow = isrAddress & 0x00'00'FF'FF, \
-	.isrAddressHigh = (isrAddress & 0xFF'FF'00'00) >> 16, \
-	\
-	.gdtEntrySelector = _gdtEntrySelector, \
-	.type = _type, \
-	.ring = _ring, \
-	.present = true, \
-	\
-	._zero = 0, \
-	._zero2 = 0, \
-}
-
 // See Idt.asm
-[[gnu::cdecl]]
-void IdtLoadi686(const struct IdtDescriptor* descriptor);
-
-void IdtInitializei686(void);
+void IdtGateSet(const u8 interrupt, const uintptr_t isrAddress, const enum IdtGateType, const u8 ring);
+[[gnu::cdecl]] void IdtLoadX86(void);
+// void IdtInitializeX86(void);
