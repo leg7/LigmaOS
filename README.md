@@ -42,5 +42,10 @@ To build the OS you can run this command from the root of the repo `make`.
 
 To build and run the OS you can use this command from the root of the repo `make run`.
 
-To debug the OS open two terminals in this repo. In both of them make sure you are in the nix-shell dev environment.
-Then in one of them run `make debug` and in the other run `gf2`. Now you can set a breakpoint in the debugger and continue the program.
+To debug the OS run `make debug` from the root of the repo.
+This should open the debugger and the OS in qemu. The debugger is setup to break
+on the first line of `KernelMain(void)`. Once the bootloader is done you should
+be able to step through the OS. If you reach the end execution or have to restart the OS
+you can close the qemu window and reopen it again with `make debug`. To reattach the debugger
+to this new VM window you can type `g` mnemonic for "go" in the debugger. Then you can step
+through the OS again without loosing your debuggin session.

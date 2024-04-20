@@ -3,7 +3,24 @@ define hook-stop
 	x/i $cs*16+$eip
 end
 
+define os-setup
+	target remote localhost:26000
+	file src/isodir/boot/os.bin
+end
+
+define os-start
+	os-setup
+	break src/kernel/kernel.c:15
+	continue
+end
+
+define os-restart
+	os-setup
+	continue
+end
+
 set disassembly-flavor intel
 set architecture i8086
-target remote localhost:26000
-file src/isodir/boot/os.bin
+os-start
+
+alias g = os-restart

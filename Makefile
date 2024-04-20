@@ -18,7 +18,7 @@ OBJ_GAS := $(patsubst $(SRC_DIR)%.s, $(OBJ_DIR)%.s.o, $(SRC_GAS))
 OS = $(SRC_DIR)/isodir/boot/os.bin
 OS_ISO = $(OBJ_DIR)/os.iso
 
-.PHONY: clean
+.PHONY: clean run debug
 
 all: $(OS_ISO)
 
@@ -48,5 +48,6 @@ run: all
 	qemu-system-i386 -cdrom $(OS_ISO)
 
 debug: all
+	!(pgrep gf2) && setsid -f gf2 &
 	qemu-system-i386 -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int
 
