@@ -21,6 +21,7 @@ void KernelMain(void)
 	// __asm("mov $0, %eax");
 	// __asm("div %eax");
 	TerminalPutString("Hello, kernel World! 2\n");
+	printf("test deez nuts %d,%d,%i\n", -123, 234, 345);
 	// TerminalPutString("Hello, kernel World! 3\n");
 	// TerminalPutString("Hello, kernel World! 4\n");
 	// TerminalPutString("Hello, kernel World! 5\n");
