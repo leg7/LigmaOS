@@ -16,6 +16,11 @@ int putchar(int ch)
 
 static inline void unsignedPrint(unsigned x)
 {
+	if (x == 0) {
+		putchar('0');
+		return;
+	}
+
 	constexpr int8_t stackSize = 32;
 	char stack[stackSize]; // should be big enough for any float or 64bit number
 	int8_t stackLen = 0;
@@ -41,6 +46,45 @@ static inline void intPrint(const int x)
 		unsignedPrint(x);
 	}
 }
+
+enum : uint8_t
+{
+	PrintfStateLength_none,
+	PrintfStateLength_hh,
+	PrintfStateLength_h,
+	PrintfStateLength_l,
+	PrintfStateLength_ll,
+	PrintfStateLength_j,
+	PrintfStateLength_z,
+	PrintfStateLength_t,
+	PrintfStateLength_L,
+	PrintfStateSpecifier_none,
+	PrintfStateSpecifier_d,
+	PrintfStateSpecifier_i,
+	PrintfStateSpecifier_u,
+	PrintfStateSpecifier_o,
+	PrintfStateSpecifier_x,
+	PrintfStateSpecifier_X,
+	PrintfStateSpecifier_f,
+	PrintfStateSpecifier_F,
+	PrintfStateSpecifier_e,
+	PrintfStateSpecifier_E,
+	PrintfStateSpecifier_g,
+	PrintfStateSpecifier_G,
+	PrintfStateSpecifier_a,
+	PrintfStateSpecifier_A,
+	PrintfStateSpecifier_c,
+	PrintfStateSpecifier_s,
+	PrintfStateSpecifier_p,
+	PrintfStateSpecifier_n,
+	PrintfStateCount,
+} PrintfState;
+
+// enum PrintfState PrintfStateLength_Transition(const enum PrinfState s)
+
+// constexpr enum PrintfState PrintfStateTransitionTable[PrintfStateCount] = {
+//
+// };
 
 // Assumes 32bit SysV abi
 // TODO: buffer it and flush on \n
@@ -97,7 +141,7 @@ int printf(const char* restrict format, ...)
 			break;
 
 			case 's':
-				puts((char*)(++nextArg));
+				puts((char*)(*(++nextArg)));
 			break;
 
 			case 'p': // TODO
