@@ -17,11 +17,15 @@ void KernelMain(void)
 
 	TerminalInitialize();
 	TerminalPutString("Hello, kernel World! 1\n");
+	__asm("int $0");
+	__asm("int $1");
+	__asm("int $31");
+	__asm("int $32");
 	__asm("int $255");
 	// __asm("mov $0, %eax");
 	// __asm("div %eax");
 	TerminalPutString("Hello, kernel World! 2\n");
-	printf("test deez nuts %d,%d,%i\n", -123, 234, 345);
+	printf("%s %d,%d,%i\n", "yeah buddy", 0, 234, 345);
 	// TerminalPutString("Hello, kernel World! 3\n");
 	// TerminalPutString("Hello, kernel World! 4\n");
 	// TerminalPutString("Hello, kernel World! 5\n");
