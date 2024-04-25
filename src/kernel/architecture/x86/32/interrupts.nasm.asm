@@ -134,7 +134,7 @@ IdtLoadX86:
 
 		inc ebx
 		jmp .forExceptions
-	.endForExceptions
+	.endForExceptions:
 	add esp, 4
 
 	push dword (IdtGateFlagsType32BitInterrupt | IdtGateFlagsRing0 | IdtGateFlagsPresent)
