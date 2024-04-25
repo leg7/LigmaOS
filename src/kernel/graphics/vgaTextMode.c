@@ -68,6 +68,14 @@ void TerminalPutChar(const char c)
 		VgaTextMode.column = 0;
 		++VgaTextMode.row;
 		TerminalPutPrompt();
+	} else if (c == '\t') {
+		static constexpr u8 tabSize = 4;
+		VgaTextMode.column += tabSize;
+
+		if (VgaTextMode.column >= VgaTextMode.width) {
+			VgaTextMode.column = VgaTextMode.column - VgaTextMode.width;
+			++VgaTextMode.row;
+		}
 	} else {
 		TerminalPutEntry(c, VgaTextMode.color, VgaTextMode.column, VgaTextMode.row);
 		++VgaTextMode.column;

@@ -9,59 +9,16 @@
 #include "graphics/vgaTextMode.h"
 #include "architecture/x86/32/interrupts.h"
 #include <stdio.h>
+#include <multiboot1.h>
 
-void KernelMain(void)
+void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multiboot_info)
 {
+	if (multiboot_output_magic != MULTIBOOT_OUTPUT_MAGIC) { // kernel wasn't loaded by a multiboot boot loader
+		return;
+	}
+
 	GdtInitializeX86();
 	IdtLoadX86();
-
-	TerminalInitialize();
-	TerminalPutString("Hello, kernel World! 1\n");
-	__asm("int $0");
-	__asm("int $1");
-	__asm("int $31");
-	__asm("int $32");
-	__asm("int $255");
-	// __asm("mov $0, %eax");
-	// __asm("div %eax");
-	TerminalPutString("Hello, kernel World! 2\n");
-	printf("%s %d,%d,%i\n", "yeah buddy", 0, 234, 345);
-	// TerminalPutString("Hello, kernel World! 3\n");
-	// TerminalPutString("Hello, kernel World! 4\n");
-	// TerminalPutString("Hello, kernel World! 5\n");
-	// TerminalPutString("Hello, kernel World! 6\n");
-	// TerminalPutString("Hello, kernel World! 7\n");
-	// TerminalPutString("Hello, kernel World! 8\n");
-	// TerminalPutString("Hello, kernel World! 9\n");
-	// TerminalPutString("Hello, kernel World! 10\n");
-	// TerminalPutString("Hello, kernel World! 11\n");
-	// TerminalPutString("Hello, kernel World! 12\n");
-	// TerminalPutString("Hello, kernel World! 13\n");
-	// TerminalPutString("Hello, kernel World! 14\n");
-	// TerminalPutString("Hello, kernel World! 15\n");
-	// TerminalPutString("Hello, kernel World! 16\n");
-	// TerminalPutString("Hello, kernel World! 17\n");
-	// TerminalPutString("Hello, kernel World! 18\n");
-	// TerminalPutString("Hello, kernel World! 19\n");
-	// TerminalPutString("Hello, kernel World! 20\n");
-	// TerminalPutString("Hello, kernel World! 21\n");
-	// TerminalPutString("Hello, kernel World! 22\n");
-	// TerminalPutString("Hello, kernel World! 23\n");
-	// TerminalPutString("Hello, kernel World! 24\n");
-	// TerminalPutString("Hello, kernel World! 25\n");
-	// TerminalPutString("Hello, kernel World! 26\n");
-	// TerminalPutString("Hello, kernel World! 27\n");
-	// TerminalPutString("Hello, kernel World! 28\n");
-	// TerminalPutString("Hello, kernel World! 29\n");
-	// TerminalPutString("Hello, kernel World! 30\n");
-	// TerminalPutString("Hello, kernel World! 31\n");
-	// TerminalPutString("Hello, kernel World! 32\n");
-	// TerminalPutString("Hello, kernel World! 33\n");
-	// TerminalPutString("Hello, kernel World! 34\n");
-	// TerminalPutString("Hello, kernel World! 35\n");
-	// TerminalPutString("Hello, kernel World! 36\n");
-	// TerminalPutString("Hello, kernel World! 37\n");
-	// TerminalPutString("Hello, kernel World! 38\n");
-	// TerminalPutString("Hello, kernel World! 39\n");
-
 }
+
+
