@@ -142,7 +142,7 @@ struct [[gnu::packed]] multiboot_info
 		u32 pitch;
 		u32 width;
 		u32 height;
-		u8 bpp;
+		u8 bpp; // bits per pixel
 		u8 type;
 	} framebuffer;
 #define MULTIBOOT_INFO_FRAMEBUFFER_TYPE_INDEXED   0
@@ -153,7 +153,7 @@ struct [[gnu::packed]] multiboot_info
 	{
 		struct [[gnu::packed]]
 		{
-			u32 framebuffer_palette_address;
+			struct multiboot_color* framebuffer_palette_address;
 			u16 framebuffer_palette_num_colors;
 		};
 		struct [[gnu::packed]]
