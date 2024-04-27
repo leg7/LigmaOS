@@ -1,16 +1,16 @@
 #include "stdio.h"
-#include "../kernel/graphics/vgaTextMode.h"
+#include "../kernel/graphics/vga_text_mode.h"
 
 // TODO: make this respect the standard
 int puts(const char *string)
 {
-	TerminalPutString(string);
+	terminal_put_string(string);
 	return 1;
 }
 
 int putchar(int ch)
 {
-	TerminalPutChar(ch);
+	terminal_put_char(ch);
 	return 1;
 }
 

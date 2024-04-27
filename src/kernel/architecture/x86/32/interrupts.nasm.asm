@@ -1,15 +1,17 @@
 [bits 32]
-global IdtLoadX86
-global GdtLoadX86
+global idt_load_x86
+global gdt_load_x86
 extern printf
 
 section .text
 
 ; -------------------- ISRs --------------------
 
-global IsrLoadKernelDataSegment
-IsrLoadKernelDataSegment:
-	mov eax, 16 ; kernel data segment selector in GDT
+; TODO: these don't need to be global
+
+global isr_load_kernel_data_segment
+isr_load_kernel_data_segment:
+	mov eax, 16 ; kernel data segment selector in g_d_t
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
@@ -19,8 +21,8 @@ IsrLoadKernelDataSegment:
 	ret
 
 
-global IsrEnd
-IsrEnd:
+global isr_end
+isr_end:
 	; restore segments
 	pop eax
 	mov ds, ax
@@ -32,33 +34,33 @@ IsrEnd:
 	popa
 	iret
 
-%macro Isr 1
-	global Isr%1
-	Isr%1:
+%macro isr 1
+	global isr%1
+	isr%1:
 		pusha
 		xor eax, eax
 		mov ax, ds
 		push eax
-		call IsrLoadKernelDataSegment
+		call isr_load_kernel_data_segment
 
-		push dword [IsrMessages + (4 * %1)]
+		push dword [isr_messages + (4 * %1)]
 		push dword %1
-		push dword Msg
+		push dword isr_message_intro
 		call printf
 		add esp, 12
 
-		jmp IsrEnd
+		jmp isr_end
 %endmacro
 
 %assign i 0
 %rep 256
-	Isr i
+	isr i
 	%assign i i+1
 %endrep
 
 ; -------------------- GDT --------------------
 
-GdtLoadX86:
+gdt_load_x86:
 	push ebp
 	mov ebp, esp
 
@@ -69,9 +71,9 @@ GdtLoadX86:
 	; reload code segment
 	mov eax, [ebp + 12]
 	push eax
-	push .reloadCs
+	push .reload_cs
 	retf
-.reloadCs:
+.reload_cs:
 
 	; reload data segments
 	mov ax, [ebp + 16]
@@ -87,71 +89,71 @@ GdtLoadX86:
 
 ; -------------------- IDT --------------------
 
-%define IdtGateFlagsTypeTask             0b0_00_0_0101  ; note that in this case, the IsrAddress is unused and should be set to zero.
-%define IdtGateFlagsType16BitInterrupt   0b0_00_0_0110
-%define IdtGateFlagsType16BitTrap        0b0_00_0_0111
-%define IdtGateFlagsType32BitInterrupt   0b0_00_0_1110
-%define IdtGateFlagsType32BitTrap        0b0_00_0_1111
-%define IdtGateFlagsRing0		 0b0_00_0_0000
-%define IdtGateFlagsRing3		 0b0_11_0_0000
-%define IdtGateFlagsPresent		 0b1_00_0_0000
+%define idt_gate_flags_type_task            0b0_00_0_0101 ; note that in this case, the isr_address is unused and should be set to zero.
+%define idt_gate_flags_type16_bit_interrupt 0b0_00_0_0110
+%define idt_gate_flags_type16_bit_trap      0b0_00_0_0111
+%define idt_gate_flags_type32_bit_interrupt 0b0_00_0_1110
+%define idt_gate_flags_type32_bit_trap      0b0_00_0_1111
+%define idt_gate_flags_ring0		        0b0_00_0_0000
+%define idt_gate_flags_ring3		        0b0_11_0_0000
+%define idt_gate_flags_present		  0b1_00_0_0000
 
-; params: index of gate [0-255], IdtGateFlags byte
-IdtGateAdd:
-	; eax: offset in Idt, edx: Isr address, ecx: IdtGate flags
+; params: index of gate [0-255], idt_gate_flags byte
+idt_gate_add:
+	; eax: offset in idt, edx: isr address, ecx: idt_gate flags
 	mov eax, [esp + 4]
-	shl eax, 2		; eax = offset in Isrs
-	mov edx, [Isrs + eax]
+	shl eax, 2		; eax = offset in isrs
+	mov edx, [isrs + eax]
 	mov ecx, [esp + 8]
-	shl eax, 1 		; eax = offset in Idt
+	shl eax, 1 		; eax = offset in idt
 
-	; --- IdtGate ---
-	mov word [Idt + eax], dx                  ; Isr address low
-	mov word [Idt + eax + 2], 8 		  ; Kernel code segment selector
-	mov byte [Idt + eax + 4], 0               ; Reserved byte
-	mov byte [Idt + eax + 5], cl              ; Flags byte
+	; --- idt_gate ---
+	mov word [idt + eax], dx                  ; isr address low
+	mov word [idt + eax + 2], 8 		  ; kernel code segment selector
+	mov byte [idt + eax + 4], 0               ; reserved byte
+	mov byte [idt + eax + 5], cl              ; flags byte
 	; isr address high
 	shr edx, 16
-	mov word [Idt + eax + 6], dx
+	mov word [idt + eax + 6], dx
 
 	ret
 
 
-IdtLoadX86:
+idt_load_x86:
 	push ebp
 	mov ebp, esp
 	push ebx
 
 	xor ebx, ebx
-	push dword (IdtGateFlagsType32BitTrap | IdtGateFlagsRing0 | IdtGateFlagsPresent)
-	.forExceptions:
+	push dword (idt_gate_flags_type32_bit_trap | idt_gate_flags_ring0 | idt_gate_flags_present)
+	.for_exceptions:
 		cmp ebx, 31
-		jg .endForExceptions
+		jg .end_for_exceptions
 
 		push ebx
-		call IdtGateAdd
+		call idt_gate_add
 		add esp, 4
 
 		inc ebx
-		jmp .forExceptions
-	.endForExceptions:
+		jmp .for_exceptions
+	.end_for_exceptions:
 	add esp, 4
 
-	push dword (IdtGateFlagsType32BitInterrupt | IdtGateFlagsRing0 | IdtGateFlagsPresent)
-	.forInterrupts:
-		cmp ebx, IdtLength
-		jge .endForInterrupts
+	push dword (idt_gate_flags_type32_bit_interrupt | idt_gate_flags_ring0 | idt_gate_flags_present)
+	.for_interrupts:
+		cmp ebx, idt_length
+		jge .end_for_interrupts
 
 		push ebx
-		call IdtGateAdd
+		call idt_gate_add
 		add esp, 4
 
 		inc ebx
-		jmp .forInterrupts
-	.endForInterrupts:
+		jmp .for_interrupts
+	.end_for_interrupts:
 	add esp, 4
 
-	lidt [IdtDescriptor]
+	lidt [idt_descriptor]
 
 	pop ebx
 	mov esp, ebp
@@ -159,335 +161,335 @@ IdtLoadX86:
 	ret
 
 section .rodata
-	Msg: db "Interrupt %i: %s",10,0
+	isr_message_intro: db "interrupt %i: %s",10,0
 
-	IdtLength equ 256
+	idt_length equ 256
 
-	IdtDescriptor: dw (IdtLength * 8) - 1 ; sizeof(Idt) - 1
-		       dd Idt
+	idt_descriptor: dw (idt_length * 8) - 1 ; sizeof(idt) - 1
+		       dd idt
 
-	Isrs: dd Isr0, Isr1, Isr2, Isr3, Isr4, Isr5, Isr6, Isr7, Isr8, Isr9, Isr10, Isr11, Isr12, Isr13, Isr14, \
-		Isr15, Isr16, Isr17, Isr18, Isr19, Isr20, Isr21, Isr22, Isr23, Isr24, Isr25, Isr26, Isr27, \
-		Isr28, Isr29, Isr30, Isr31, Isr32, Isr33, Isr34, Isr35, Isr36, Isr37, Isr38, Isr39, Isr40, \
-		Isr41, Isr42, Isr43, Isr44, Isr45, Isr46, Isr47, Isr48, Isr49, Isr50, Isr51, Isr52, Isr53, \
-		Isr54, Isr55, Isr56, Isr57, Isr58, Isr59, Isr60, Isr61, Isr62, Isr63, Isr64, Isr65, Isr66, \
-		Isr67, Isr68, Isr69, Isr70, Isr71, Isr72, Isr73, Isr74, Isr75, Isr76, Isr77, Isr78, Isr79, \
-		Isr80, Isr81, Isr82, Isr83, Isr84, Isr85, Isr86, Isr87, Isr88, Isr89, Isr90, Isr91, Isr92, \
-		Isr93, Isr94, Isr95, Isr96, Isr97, Isr98, Isr99, Isr100, Isr101, Isr102, Isr103, Isr104, Isr105, \
-		Isr106, Isr107, Isr108, Isr109, Isr110, Isr111, Isr112, Isr113, Isr114, Isr115, Isr116, Isr117, Isr118, \
-		Isr119, Isr120, Isr121, Isr122, Isr123, Isr124, Isr125, Isr126, Isr127, Isr128, Isr129, Isr130, Isr131, \
-		Isr132, Isr133, Isr134, Isr135, Isr136, Isr137, Isr138, Isr139, Isr140, Isr141, Isr142, Isr143, Isr144, \
-		Isr145, Isr146, Isr147, Isr148, Isr149, Isr150, Isr151, Isr152, Isr153, Isr154, Isr155, Isr156, Isr157, \
-		Isr158, Isr159, Isr160, Isr161, Isr162, Isr163, Isr164, Isr165, Isr166, Isr167, Isr168, Isr169, Isr170, \
-		Isr171, Isr172, Isr173, Isr174, Isr175, Isr176, Isr177, Isr178, Isr179, Isr180, Isr181, Isr182, Isr183, \
-		Isr184, Isr185, Isr186, Isr187, Isr188, Isr189, Isr190, Isr191, Isr192, Isr193, Isr194, Isr195, Isr196, \
-		Isr197, Isr198, Isr199, Isr200, Isr201, Isr202, Isr203, Isr204, Isr205, Isr206, Isr207, Isr208, Isr209, \
-		Isr210, Isr211, Isr212, Isr213, Isr214, Isr215, Isr216, Isr217, Isr218, Isr219, Isr220, Isr221, Isr222, \
-		Isr223, Isr224, Isr225, Isr226, Isr227, Isr228, Isr229, Isr230, Isr231, Isr232, Isr233, Isr234, Isr235, \
-		Isr236, Isr237, Isr238, Isr239, Isr240, Isr241, Isr242, Isr243, Isr244, Isr245, Isr246, Isr247, Isr248, \
-		Isr249, Isr250, Isr251, Isr252, Isr253, Isr254, Isr255
+	isrs: dd isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7, isr8, isr9, isr10, isr11, isr12, isr13, isr14, \
+		isr15, isr16, isr17, isr18, isr19, isr20, isr21, isr22, isr23, isr24, isr25, isr26, isr27, \
+		isr28, isr29, isr30, isr31, isr32, isr33, isr34, isr35, isr36, isr37, isr38, isr39, isr40, \
+		isr41, isr42, isr43, isr44, isr45, isr46, isr47, isr48, isr49, isr50, isr51, isr52, isr53, \
+		isr54, isr55, isr56, isr57, isr58, isr59, isr60, isr61, isr62, isr63, isr64, isr65, isr66, \
+		isr67, isr68, isr69, isr70, isr71, isr72, isr73, isr74, isr75, isr76, isr77, isr78, isr79, \
+		isr80, isr81, isr82, isr83, isr84, isr85, isr86, isr87, isr88, isr89, isr90, isr91, isr92, \
+		isr93, isr94, isr95, isr96, isr97, isr98, isr99, isr100, isr101, isr102, isr103, isr104, isr105, \
+		isr106, isr107, isr108, isr109, isr110, isr111, isr112, isr113, isr114, isr115, isr116, isr117, isr118, \
+		isr119, isr120, isr121, isr122, isr123, isr124, isr125, isr126, isr127, isr128, isr129, isr130, isr131, \
+		isr132, isr133, isr134, isr135, isr136, isr137, isr138, isr139, isr140, isr141, isr142, isr143, isr144, \
+		isr145, isr146, isr147, isr148, isr149, isr150, isr151, isr152, isr153, isr154, isr155, isr156, isr157, \
+		isr158, isr159, isr160, isr161, isr162, isr163, isr164, isr165, isr166, isr167, isr168, isr169, isr170, \
+		isr171, isr172, isr173, isr174, isr175, isr176, isr177, isr178, isr179, isr180, isr181, isr182, isr183, \
+		isr184, isr185, isr186, isr187, isr188, isr189, isr190, isr191, isr192, isr193, isr194, isr195, isr196, \
+		isr197, isr198, isr199, isr200, isr201, isr202, isr203, isr204, isr205, isr206, isr207, isr208, isr209, \
+		isr210, isr211, isr212, isr213, isr214, isr215, isr216, isr217, isr218, isr219, isr220, isr221, isr222, \
+		isr223, isr224, isr225, isr226, isr227, isr228, isr229, isr230, isr231, isr232, isr233, isr234, isr235, \
+		isr236, isr237, isr238, isr239, isr240, isr241, isr242, isr243, isr244, isr245, isr246, isr247, isr248, \
+		isr249, isr250, isr251, isr252, isr253, isr254, isr255
 
-	IsrMessage0:   db "Division by 0", 0
-	IsrMessage1:   db "Debug", 0
-	IsrMessage2:   db "Non-maskable interrupt", 0
-	IsrMessage3:   db "Breakpoint", 0
-	IsrMessage4:   db "Overflow", 0
-	IsrMessage5:   db "Bound Range Exceeded", 0
-	IsrMessage6:   db "Invalid Opcode", 0
-	IsrMessage7:   db "Device not available", 0
-	IsrMessage8:   db "Double Fault", 0
-	IsrMessage9:   db "Coprocessor Segment Overrun", 0
-	IsrMessage10:  db "Invalid TSS", 0
-	IsrMessage11:  db "Segment not present", 0
-	IsrMessage12:  db "Stack-Segment Fault", 0
-	IsrMessage13:  db "General Protection Fault", 0
-	IsrMessage14:  db "Page Fault", 0
-	IsrMessage15:  db "Reserved", 0
-	IsrMessage16:  db "x87 Floating-Point Exception", 0
-	IsrMessage17:  db "Alignment Check", 0
-	IsrMessage18:  db "Machine Check", 0
-	IsrMessage19:  db "SIMD Floating-Point Exception", 0
-	IsrMessage20:  db "Virtualization Exception", 0
-	IsrMessage21:  db "Control Protection Exception", 0
-	IsrMessage22:  db "Reserved", 0
-	IsrMessage23:  db "Reserved", 0
-	IsrMessage24:  db "Reserved", 0
-	IsrMessage25:  db "Reserved", 0
-	IsrMessage26:  db "Reserved", 0
-	IsrMessage27:  db "Reserved", 0
-	IsrMessage28:  db "Hypervisor Injection Exception", 0
-	IsrMessage29:  db "VMM Communication Exception", 0
-	IsrMessage30:  db "Security Exception", 0
-	IsrMessage31:  db "Reserved", 0
-	IsrMessage32:  db "Testing for 32",  0
-	IsrMessage33:  db "Testing for 33",  0
-	IsrMessage34:  db "Testing for 34",  0
-	IsrMessage35:  db "Testing for 35",  0
-	IsrMessage36:  db "Testing for 36",  0
-	IsrMessage37:  db "Testing for 37",  0
-	IsrMessage38:  db "Testing for 38",  0
-	IsrMessage39:  db "Testing for 39",  0
-	IsrMessage40:  db "Testing for 40",  0
-	IsrMessage41:  db "Testing for 41",  0
-	IsrMessage42:  db "Testing for 42",  0
-	IsrMessage43:  db "Testing for 43",  0
-	IsrMessage44:  db "Testing for 44",  0
-	IsrMessage45:  db "Testing for 45",  0
-	IsrMessage46:  db "Testing for 46",  0
-	IsrMessage47:  db "Testing for 47",  0
-	IsrMessage48:  db "Testing for 48",  0
-	IsrMessage49:  db "Testing for 49",  0
-	IsrMessage50:  db "Testing for 50",  0
-	IsrMessage51:  db "Testing for 51",  0
-	IsrMessage52:  db "Testing for 52",  0
-	IsrMessage53:  db "Testing for 53",  0
-	IsrMessage54:  db "Testing for 54",  0
-	IsrMessage55:  db "Testing for 55",  0
-	IsrMessage56:  db "Testing for 56",  0
-	IsrMessage57:  db "Testing for 57",  0
-	IsrMessage58:  db "Testing for 58",  0
-	IsrMessage59:  db "Testing for 59",  0
-	IsrMessage60:  db "Testing for 60",  0
-	IsrMessage61:  db "Testing for 61",  0
-	IsrMessage62:  db "Testing for 62",  0
-	IsrMessage63:  db "Testing for 63",  0
-	IsrMessage64:  db "Testing for 64",  0
-	IsrMessage65:  db "Testing for 65",  0
-	IsrMessage66:  db "Testing for 66",  0
-	IsrMessage67:  db "Testing for 67",  0
-	IsrMessage68:  db "Testing for 68",  0
-	IsrMessage69:  db "Testing for 69",  0
-	IsrMessage70:  db "Testing for 70",  0
-	IsrMessage71:  db "Testing for 71",  0
-	IsrMessage72:  db "Testing for 72",  0
-	IsrMessage73:  db "Testing for 73",  0
-	IsrMessage74:  db "Testing for 74",  0
-	IsrMessage75:  db "Testing for 75",  0
-	IsrMessage76:  db "Testing for 76",  0
-	IsrMessage77:  db "Testing for 77",  0
-	IsrMessage78:  db "Testing for 78",  0
-	IsrMessage79:  db "Testing for 79",  0
-	IsrMessage80:  db "Testing for 80",  0
-	IsrMessage81:  db "Testing for 81",  0
-	IsrMessage82:  db "Testing for 82",  0
-	IsrMessage83:  db "Testing for 83",  0
-	IsrMessage84:  db "Testing for 84",  0
-	IsrMessage85:  db "Testing for 85",  0
-	IsrMessage86:  db "Testing for 86",  0
-	IsrMessage87:  db "Testing for 87",  0
-	IsrMessage88:  db "Testing for 88",  0
-	IsrMessage89:  db "Testing for 89",  0
-	IsrMessage90:  db "Testing for 90",  0
-	IsrMessage91:  db "Testing for 91",  0
-	IsrMessage92:  db "Testing for 92",  0
-	IsrMessage93:  db "Testing for 93",  0
-	IsrMessage94:  db "Testing for 94",  0
-	IsrMessage95:  db "Testing for 95",  0
-	IsrMessage96:  db "Testing for 96",  0
-	IsrMessage97:  db "Testing for 97",  0
-	IsrMessage98:  db "Testing for 98",  0
-	IsrMessage99:  db "Testing for 99",  0
-	IsrMessage100: db "Testing for 100", 0
-	IsrMessage101: db "Testing for 101", 0
-	IsrMessage102: db "Testing for 102", 0
-	IsrMessage103: db "Testing for 103", 0
-	IsrMessage104: db "Testing for 104", 0
-	IsrMessage105: db "Testing for 105", 0
-	IsrMessage106: db "Testing for 106", 0
-	IsrMessage107: db "Testing for 107", 0
-	IsrMessage108: db "Testing for 108", 0
-	IsrMessage109: db "Testing for 109", 0
-	IsrMessage110: db "Testing for 110", 0
-	IsrMessage111: db "Testing for 111", 0
-	IsrMessage112: db "Testing for 112", 0
-	IsrMessage113: db "Testing for 113", 0
-	IsrMessage114: db "Testing for 114", 0
-	IsrMessage115: db "Testing for 115", 0
-	IsrMessage116: db "Testing for 116", 0
-	IsrMessage117: db "Testing for 117", 0
-	IsrMessage118: db "Testing for 118", 0
-	IsrMessage119: db "Testing for 119", 0
-	IsrMessage120: db "Testing for 120", 0
-	IsrMessage121: db "Testing for 121", 0
-	IsrMessage122: db "Testing for 122", 0
-	IsrMessage123: db "Testing for 123", 0
-	IsrMessage124: db "Testing for 124", 0
-	IsrMessage125: db "Testing for 125", 0
-	IsrMessage126: db "Testing for 126", 0
-	IsrMessage127: db "Testing for 127", 0
-	IsrMessage128: db "Testing for 128", 0
-	IsrMessage129: db "Testing for 129", 0
-	IsrMessage130: db "Testing for 130", 0
-	IsrMessage131: db "Testing for 131", 0
-	IsrMessage132: db "Testing for 132", 0
-	IsrMessage133: db "Testing for 133", 0
-	IsrMessage134: db "Testing for 134", 0
-	IsrMessage135: db "Testing for 135", 0
-	IsrMessage136: db "Testing for 136", 0
-	IsrMessage137: db "Testing for 137", 0
-	IsrMessage138: db "Testing for 138", 0
-	IsrMessage139: db "Testing for 139", 0
-	IsrMessage140: db "Testing for 140", 0
-	IsrMessage141: db "Testing for 141", 0
-	IsrMessage142: db "Testing for 142", 0
-	IsrMessage143: db "Testing for 143", 0
-	IsrMessage144: db "Testing for 144", 0
-	IsrMessage145: db "Testing for 145", 0
-	IsrMessage146: db "Testing for 146", 0
-	IsrMessage147: db "Testing for 147", 0
-	IsrMessage148: db "Testing for 148", 0
-	IsrMessage149: db "Testing for 149", 0
-	IsrMessage150: db "Testing for 150", 0
-	IsrMessage151: db "Testing for 151", 0
-	IsrMessage152: db "Testing for 152", 0
-	IsrMessage153: db "Testing for 153", 0
-	IsrMessage154: db "Testing for 154", 0
-	IsrMessage155: db "Testing for 155", 0
-	IsrMessage156: db "Testing for 156", 0
-	IsrMessage157: db "Testing for 157", 0
-	IsrMessage158: db "Testing for 158", 0
-	IsrMessage159: db "Testing for 159", 0
-	IsrMessage160: db "Testing for 160", 0
-	IsrMessage161: db "Testing for 161", 0
-	IsrMessage162: db "Testing for 162", 0
-	IsrMessage163: db "Testing for 163", 0
-	IsrMessage164: db "Testing for 164", 0
-	IsrMessage165: db "Testing for 165", 0
-	IsrMessage166: db "Testing for 166", 0
-	IsrMessage167: db "Testing for 167", 0
-	IsrMessage168: db "Testing for 168", 0
-	IsrMessage169: db "Testing for 169", 0
-	IsrMessage170: db "Testing for 170", 0
-	IsrMessage171: db "Testing for 171", 0
-	IsrMessage172: db "Testing for 172", 0
-	IsrMessage173: db "Testing for 173", 0
-	IsrMessage174: db "Testing for 174", 0
-	IsrMessage175: db "Testing for 175", 0
-	IsrMessage176: db "Testing for 176", 0
-	IsrMessage177: db "Testing for 177", 0
-	IsrMessage178: db "Testing for 178", 0
-	IsrMessage179: db "Testing for 179", 0
-	IsrMessage180: db "Testing for 180", 0
-	IsrMessage181: db "Testing for 181", 0
-	IsrMessage182: db "Testing for 182", 0
-	IsrMessage183: db "Testing for 183", 0
-	IsrMessage184: db "Testing for 184", 0
-	IsrMessage185: db "Testing for 185", 0
-	IsrMessage186: db "Testing for 186", 0
-	IsrMessage187: db "Testing for 187", 0
-	IsrMessage188: db "Testing for 188", 0
-	IsrMessage189: db "Testing for 189", 0
-	IsrMessage190: db "Testing for 190", 0
-	IsrMessage191: db "Testing for 191", 0
-	IsrMessage192: db "Testing for 192", 0
-	IsrMessage193: db "Testing for 193", 0
-	IsrMessage194: db "Testing for 194", 0
-	IsrMessage195: db "Testing for 195", 0
-	IsrMessage196: db "Testing for 196", 0
-	IsrMessage197: db "Testing for 197", 0
-	IsrMessage198: db "Testing for 198", 0
-	IsrMessage199: db "Testing for 199", 0
-	IsrMessage200: db "Testing for 200", 0
-	IsrMessage201: db "Testing for 201", 0
-	IsrMessage202: db "Testing for 202", 0
-	IsrMessage203: db "Testing for 203", 0
-	IsrMessage204: db "Testing for 204", 0
-	IsrMessage205: db "Testing for 205", 0
-	IsrMessage206: db "Testing for 206", 0
-	IsrMessage207: db "Testing for 207", 0
-	IsrMessage208: db "Testing for 208", 0
-	IsrMessage209: db "Testing for 209", 0
-	IsrMessage210: db "Testing for 210", 0
-	IsrMessage211: db "Testing for 211", 0
-	IsrMessage212: db "Testing for 212", 0
-	IsrMessage213: db "Testing for 213", 0
-	IsrMessage214: db "Testing for 214", 0
-	IsrMessage215: db "Testing for 215", 0
-	IsrMessage216: db "Testing for 216", 0
-	IsrMessage217: db "Testing for 217", 0
-	IsrMessage218: db "Testing for 218", 0
-	IsrMessage219: db "Testing for 219", 0
-	IsrMessage220: db "Testing for 220", 0
-	IsrMessage221: db "Testing for 221", 0
-	IsrMessage222: db "Testing for 222", 0
-	IsrMessage223: db "Testing for 223", 0
-	IsrMessage224: db "Testing for 224", 0
-	IsrMessage225: db "Testing for 225", 0
-	IsrMessage226: db "Testing for 226", 0
-	IsrMessage227: db "Testing for 227", 0
-	IsrMessage228: db "Testing for 228", 0
-	IsrMessage229: db "Testing for 229", 0
-	IsrMessage230: db "Testing for 230", 0
-	IsrMessage231: db "Testing for 231", 0
-	IsrMessage232: db "Testing for 232", 0
-	IsrMessage233: db "Testing for 233", 0
-	IsrMessage234: db "Testing for 234", 0
-	IsrMessage235: db "Testing for 235", 0
-	IsrMessage236: db "Testing for 236", 0
-	IsrMessage237: db "Testing for 237", 0
-	IsrMessage238: db "Testing for 238", 0
-	IsrMessage239: db "Testing for 239", 0
-	IsrMessage240: db "Testing for 240", 0
-	IsrMessage241: db "Testing for 241", 0
-	IsrMessage242: db "Testing for 242", 0
-	IsrMessage243: db "Testing for 243", 0
-	IsrMessage244: db "Testing for 244", 0
-	IsrMessage245: db "Testing for 245", 0
-	IsrMessage246: db "Testing for 246", 0
-	IsrMessage247: db "Testing for 247", 0
-	IsrMessage248: db "Testing for 248", 0
-	IsrMessage249: db "Testing for 249", 0
-	IsrMessage250: db "Testing for 250", 0
-	IsrMessage251: db "Testing for 251", 0
-	IsrMessage252: db "Testing for 252", 0
-	IsrMessage253: db "Testing for 253", 0
-	IsrMessage254: db "Testing for 254", 0
-	IsrMessage255: db "Testing for 255", 0
+	isr_message_0:   db "division by 0", 0
+	isr_message_1:   db "debug", 0
+	isr_message_2:   db "non-maskable interrupt", 0
+	isr_message_3:   db "breakpoint", 0
+	isr_message_4:   db "overflow", 0
+	isr_message_5:   db "bound range exceeded", 0
+	isr_message_6:   db "invalid opcode", 0
+	isr_message_7:   db "device not available", 0
+	isr_message_8:   db "double fault", 0
+	isr_message_9:   db "coprocessor segment overrun", 0
+	isr_message_10:  db "invalid t_s_s", 0
+	isr_message_11:  db "segment not present", 0
+	isr_message_12:  db "stack-_segment fault", 0
+	isr_message_13:  db "general protection fault", 0
+	isr_message_14:  db "page fault", 0
+	isr_message_15:  db "reserved", 0
+	isr_message_16:  db "x87 floating-_point exception", 0
+	isr_message_17:  db "alignment check", 0
+	isr_message_18:  db "machine check", 0
+	isr_message_19:  db "s_i_m_d floating-_point exception", 0
+	isr_message_20:  db "virtualization exception", 0
+	isr_message_21:  db "control protection exception", 0
+	isr_message_22:  db "reserved", 0
+	isr_message_23:  db "reserved", 0
+	isr_message_24:  db "reserved", 0
+	isr_message_25:  db "reserved", 0
+	isr_message_26:  db "reserved", 0
+	isr_message_27:  db "reserved", 0
+	isr_message_28:  db "hypervisor injection exception", 0
+	isr_message_29:  db "v_m_m communication exception", 0
+	isr_message_30:  db "security exception", 0
+	isr_message_31:  db "reserved", 0
+	isr_message_32:  db "testing for 32",  0
+	isr_message_33:  db "testing for 33",  0
+	isr_message_34:  db "testing for 34",  0
+	isr_message_35:  db "testing for 35",  0
+	isr_message_36:  db "testing for 36",  0
+	isr_message_37:  db "testing for 37",  0
+	isr_message_38:  db "testing for 38",  0
+	isr_message_39:  db "testing for 39",  0
+	isr_message_40:  db "testing for 40",  0
+	isr_message_41:  db "testing for 41",  0
+	isr_message_42:  db "testing for 42",  0
+	isr_message_43:  db "testing for 43",  0
+	isr_message_44:  db "testing for 44",  0
+	isr_message_45:  db "testing for 45",  0
+	isr_message_46:  db "testing for 46",  0
+	isr_message_47:  db "testing for 47",  0
+	isr_message_48:  db "testing for 48",  0
+	isr_message_49:  db "testing for 49",  0
+	isr_message_50:  db "testing for 50",  0
+	isr_message_51:  db "testing for 51",  0
+	isr_message_52:  db "testing for 52",  0
+	isr_message_53:  db "testing for 53",  0
+	isr_message_54:  db "testing for 54",  0
+	isr_message_55:  db "testing for 55",  0
+	isr_message_56:  db "testing for 56",  0
+	isr_message_57:  db "testing for 57",  0
+	isr_message_58:  db "testing for 58",  0
+	isr_message_59:  db "testing for 59",  0
+	isr_message_60:  db "testing for 60",  0
+	isr_message_61:  db "testing for 61",  0
+	isr_message_62:  db "testing for 62",  0
+	isr_message_63:  db "testing for 63",  0
+	isr_message_64:  db "testing for 64",  0
+	isr_message_65:  db "testing for 65",  0
+	isr_message_66:  db "testing for 66",  0
+	isr_message_67:  db "testing for 67",  0
+	isr_message_68:  db "testing for 68",  0
+	isr_message_69:  db "testing for 69",  0
+	isr_message_70:  db "testing for 70",  0
+	isr_message_71:  db "testing for 71",  0
+	isr_message_72:  db "testing for 72",  0
+	isr_message_73:  db "testing for 73",  0
+	isr_message_74:  db "testing for 74",  0
+	isr_message_75:  db "testing for 75",  0
+	isr_message_76:  db "testing for 76",  0
+	isr_message_77:  db "testing for 77",  0
+	isr_message_78:  db "testing for 78",  0
+	isr_message_79:  db "testing for 79",  0
+	isr_message_80:  db "testing for 80",  0
+	isr_message_81:  db "testing for 81",  0
+	isr_message_82:  db "testing for 82",  0
+	isr_message_83:  db "testing for 83",  0
+	isr_message_84:  db "testing for 84",  0
+	isr_message_85:  db "testing for 85",  0
+	isr_message_86:  db "testing for 86",  0
+	isr_message_87:  db "testing for 87",  0
+	isr_message_88:  db "testing for 88",  0
+	isr_message_89:  db "testing for 89",  0
+	isr_message_90:  db "testing for 90",  0
+	isr_message_91:  db "testing for 91",  0
+	isr_message_92:  db "testing for 92",  0
+	isr_message_93:  db "testing for 93",  0
+	isr_message_94:  db "testing for 94",  0
+	isr_message_95:  db "testing for 95",  0
+	isr_message_96:  db "testing for 96",  0
+	isr_message_97:  db "testing for 97",  0
+	isr_message_98:  db "testing for 98",  0
+	isr_message_99:  db "testing for 99",  0
+	isr_message_100: db "testing for 100", 0
+	isr_message_101: db "testing for 101", 0
+	isr_message_102: db "testing for 102", 0
+	isr_message_103: db "testing for 103", 0
+	isr_message_104: db "testing for 104", 0
+	isr_message_105: db "testing for 105", 0
+	isr_message_106: db "testing for 106", 0
+	isr_message_107: db "testing for 107", 0
+	isr_message_108: db "testing for 108", 0
+	isr_message_109: db "testing for 109", 0
+	isr_message_110: db "testing for 110", 0
+	isr_message_111: db "testing for 111", 0
+	isr_message_112: db "testing for 112", 0
+	isr_message_113: db "testing for 113", 0
+	isr_message_114: db "testing for 114", 0
+	isr_message_115: db "testing for 115", 0
+	isr_message_116: db "testing for 116", 0
+	isr_message_117: db "testing for 117", 0
+	isr_message_118: db "testing for 118", 0
+	isr_message_119: db "testing for 119", 0
+	isr_message_120: db "testing for 120", 0
+	isr_message_121: db "testing for 121", 0
+	isr_message_122: db "testing for 122", 0
+	isr_message_123: db "testing for 123", 0
+	isr_message_124: db "testing for 124", 0
+	isr_message_125: db "testing for 125", 0
+	isr_message_126: db "testing for 126", 0
+	isr_message_127: db "testing for 127", 0
+	isr_message_128: db "testing for 128", 0
+	isr_message_129: db "testing for 129", 0
+	isr_message_130: db "testing for 130", 0
+	isr_message_131: db "testing for 131", 0
+	isr_message_132: db "testing for 132", 0
+	isr_message_133: db "testing for 133", 0
+	isr_message_134: db "testing for 134", 0
+	isr_message_135: db "testing for 135", 0
+	isr_message_136: db "testing for 136", 0
+	isr_message_137: db "testing for 137", 0
+	isr_message_138: db "testing for 138", 0
+	isr_message_139: db "testing for 139", 0
+	isr_message_140: db "testing for 140", 0
+	isr_message_141: db "testing for 141", 0
+	isr_message_142: db "testing for 142", 0
+	isr_message_143: db "testing for 143", 0
+	isr_message_144: db "testing for 144", 0
+	isr_message_145: db "testing for 145", 0
+	isr_message_146: db "testing for 146", 0
+	isr_message_147: db "testing for 147", 0
+	isr_message_148: db "testing for 148", 0
+	isr_message_149: db "testing for 149", 0
+	isr_message_150: db "testing for 150", 0
+	isr_message_151: db "testing for 151", 0
+	isr_message_152: db "testing for 152", 0
+	isr_message_153: db "testing for 153", 0
+	isr_message_154: db "testing for 154", 0
+	isr_message_155: db "testing for 155", 0
+	isr_message_156: db "testing for 156", 0
+	isr_message_157: db "testing for 157", 0
+	isr_message_158: db "testing for 158", 0
+	isr_message_159: db "testing for 159", 0
+	isr_message_160: db "testing for 160", 0
+	isr_message_161: db "testing for 161", 0
+	isr_message_162: db "testing for 162", 0
+	isr_message_163: db "testing for 163", 0
+	isr_message_164: db "testing for 164", 0
+	isr_message_165: db "testing for 165", 0
+	isr_message_166: db "testing for 166", 0
+	isr_message_167: db "testing for 167", 0
+	isr_message_168: db "testing for 168", 0
+	isr_message_169: db "testing for 169", 0
+	isr_message_170: db "testing for 170", 0
+	isr_message_171: db "testing for 171", 0
+	isr_message_172: db "testing for 172", 0
+	isr_message_173: db "testing for 173", 0
+	isr_message_174: db "testing for 174", 0
+	isr_message_175: db "testing for 175", 0
+	isr_message_176: db "testing for 176", 0
+	isr_message_177: db "testing for 177", 0
+	isr_message_178: db "testing for 178", 0
+	isr_message_179: db "testing for 179", 0
+	isr_message_180: db "testing for 180", 0
+	isr_message_181: db "testing for 181", 0
+	isr_message_182: db "testing for 182", 0
+	isr_message_183: db "testing for 183", 0
+	isr_message_184: db "testing for 184", 0
+	isr_message_185: db "testing for 185", 0
+	isr_message_186: db "testing for 186", 0
+	isr_message_187: db "testing for 187", 0
+	isr_message_188: db "testing for 188", 0
+	isr_message_189: db "testing for 189", 0
+	isr_message_190: db "testing for 190", 0
+	isr_message_191: db "testing for 191", 0
+	isr_message_192: db "testing for 192", 0
+	isr_message_193: db "testing for 193", 0
+	isr_message_194: db "testing for 194", 0
+	isr_message_195: db "testing for 195", 0
+	isr_message_196: db "testing for 196", 0
+	isr_message_197: db "testing for 197", 0
+	isr_message_198: db "testing for 198", 0
+	isr_message_199: db "testing for 199", 0
+	isr_message_200: db "testing for 200", 0
+	isr_message_201: db "testing for 201", 0
+	isr_message_202: db "testing for 202", 0
+	isr_message_203: db "testing for 203", 0
+	isr_message_204: db "testing for 204", 0
+	isr_message_205: db "testing for 205", 0
+	isr_message_206: db "testing for 206", 0
+	isr_message_207: db "testing for 207", 0
+	isr_message_208: db "testing for 208", 0
+	isr_message_209: db "testing for 209", 0
+	isr_message_210: db "testing for 210", 0
+	isr_message_211: db "testing for 211", 0
+	isr_message_212: db "testing for 212", 0
+	isr_message_213: db "testing for 213", 0
+	isr_message_214: db "testing for 214", 0
+	isr_message_215: db "testing for 215", 0
+	isr_message_216: db "testing for 216", 0
+	isr_message_217: db "testing for 217", 0
+	isr_message_218: db "testing for 218", 0
+	isr_message_219: db "testing for 219", 0
+	isr_message_220: db "testing for 220", 0
+	isr_message_221: db "testing for 221", 0
+	isr_message_222: db "testing for 222", 0
+	isr_message_223: db "testing for 223", 0
+	isr_message_224: db "testing for 224", 0
+	isr_message_225: db "testing for 225", 0
+	isr_message_226: db "testing for 226", 0
+	isr_message_227: db "testing for 227", 0
+	isr_message_228: db "testing for 228", 0
+	isr_message_229: db "testing for 229", 0
+	isr_message_230: db "testing for 230", 0
+	isr_message_231: db "testing for 231", 0
+	isr_message_232: db "testing for 232", 0
+	isr_message_233: db "testing for 233", 0
+	isr_message_234: db "testing for 234", 0
+	isr_message_235: db "testing for 235", 0
+	isr_message_236: db "testing for 236", 0
+	isr_message_237: db "testing for 237", 0
+	isr_message_238: db "testing for 238", 0
+	isr_message_239: db "testing for 239", 0
+	isr_message_240: db "testing for 240", 0
+	isr_message_241: db "testing for 241", 0
+	isr_message_242: db "testing for 242", 0
+	isr_message_243: db "testing for 243", 0
+	isr_message_244: db "testing for 244", 0
+	isr_message_245: db "testing for 245", 0
+	isr_message_246: db "testing for 246", 0
+	isr_message_247: db "testing for 247", 0
+	isr_message_248: db "testing for 248", 0
+	isr_message_249: db "testing for 249", 0
+	isr_message_250: db "testing for 250", 0
+	isr_message_251: db "testing for 251", 0
+	isr_message_252: db "testing for 252", 0
+	isr_message_253: db "testing for 253", 0
+	isr_message_254: db "testing for 254", 0
+	isr_message_255: db "testing for 255", 0
 
-	IsrMessages: dd IsrMessage0, IsrMessage1, IsrMessage2, IsrMessage3, IsrMessage4, \
-		IsrMessage5, IsrMessage6, IsrMessage7, IsrMessage8, IsrMessage9, IsrMessage10, \
-		IsrMessage11, IsrMessage12, IsrMessage13, IsrMessage14, IsrMessage15, IsrMessage16, \
-		IsrMessage17, IsrMessage18, IsrMessage19, IsrMessage20, IsrMessage21, IsrMessage22, \
-		IsrMessage23, IsrMessage24, IsrMessage25, IsrMessage26, IsrMessage27, IsrMessage28, \
-		IsrMessage29, IsrMessage30, IsrMessage31, IsrMessage32, IsrMessage33, IsrMessage34, \
-		IsrMessage35, IsrMessage36, IsrMessage37, IsrMessage38, IsrMessage39, IsrMessage40, \
-		IsrMessage41, IsrMessage42, IsrMessage43, IsrMessage44, IsrMessage45, IsrMessage46, \
-		IsrMessage47, IsrMessage48, IsrMessage49, IsrMessage50, IsrMessage51, IsrMessage52, \
-		IsrMessage53, IsrMessage54, IsrMessage55, IsrMessage56, IsrMessage57, IsrMessage58, \
-		IsrMessage59, IsrMessage60, IsrMessage61, IsrMessage62, IsrMessage63, IsrMessage64, \
-		IsrMessage65, IsrMessage66, IsrMessage67, IsrMessage68, IsrMessage69, IsrMessage70, \
-		IsrMessage71, IsrMessage72, IsrMessage73, IsrMessage74, IsrMessage75, IsrMessage76, \
-		IsrMessage77, IsrMessage78, IsrMessage79, IsrMessage80, IsrMessage81, IsrMessage82, \
-		IsrMessage83, IsrMessage84, IsrMessage85, IsrMessage86, IsrMessage87, IsrMessage88, \
-		IsrMessage89, IsrMessage90, IsrMessage91, IsrMessage92, IsrMessage93, IsrMessage94, \
-		IsrMessage95, IsrMessage96, IsrMessage97, IsrMessage98, IsrMessage99, IsrMessage100, \
-		IsrMessage101, IsrMessage102, IsrMessage103, IsrMessage104, IsrMessage105, IsrMessage106, \
-		IsrMessage107, IsrMessage108, IsrMessage109, IsrMessage110, IsrMessage111, IsrMessage112, \
-		IsrMessage113, IsrMessage114, IsrMessage115, IsrMessage116, IsrMessage117, IsrMessage118, \
-		IsrMessage119, IsrMessage120, IsrMessage121, IsrMessage122, IsrMessage123, IsrMessage124, \
-		IsrMessage125, IsrMessage126, IsrMessage127, IsrMessage128, IsrMessage129, IsrMessage130, \
-		IsrMessage131, IsrMessage132, IsrMessage133, IsrMessage134, IsrMessage135, IsrMessage136, \
-		IsrMessage137, IsrMessage138, IsrMessage139, IsrMessage140, IsrMessage141, IsrMessage142, \
-		IsrMessage143, IsrMessage144, IsrMessage145, IsrMessage146, IsrMessage147, IsrMessage148, \
-		IsrMessage149, IsrMessage150, IsrMessage151, IsrMessage152, IsrMessage153, IsrMessage154, \
-		IsrMessage155, IsrMessage156, IsrMessage157, IsrMessage158, IsrMessage159, IsrMessage160, \
-		IsrMessage161, IsrMessage162, IsrMessage163, IsrMessage164, IsrMessage165, IsrMessage166, \
-		IsrMessage167, IsrMessage168, IsrMessage169, IsrMessage170, IsrMessage171, IsrMessage172, \
-		IsrMessage173, IsrMessage174, IsrMessage175, IsrMessage176, IsrMessage177, IsrMessage178, \
-		IsrMessage179, IsrMessage180, IsrMessage181, IsrMessage182, IsrMessage183, IsrMessage184, \
-		IsrMessage185, IsrMessage186, IsrMessage187, IsrMessage188, IsrMessage189, IsrMessage190, \
-		IsrMessage191, IsrMessage192, IsrMessage193, IsrMessage194, IsrMessage195, IsrMessage196, \
-		IsrMessage197, IsrMessage198, IsrMessage199, IsrMessage200, IsrMessage201, IsrMessage202, \
-		IsrMessage203, IsrMessage204, IsrMessage205, IsrMessage206, IsrMessage207, IsrMessage208, \
-		IsrMessage209, IsrMessage210, IsrMessage211, IsrMessage212, IsrMessage213, IsrMessage214, \
-		IsrMessage215, IsrMessage216, IsrMessage217, IsrMessage218, IsrMessage219, IsrMessage220, \
-		IsrMessage221, IsrMessage222, IsrMessage223, IsrMessage224, IsrMessage225, IsrMessage226, \
-		IsrMessage227, IsrMessage228, IsrMessage229, IsrMessage230, IsrMessage231, IsrMessage232, \
-		IsrMessage233, IsrMessage234, IsrMessage235, IsrMessage236, IsrMessage237, IsrMessage238, \
-		IsrMessage239, IsrMessage240, IsrMessage241, IsrMessage242, IsrMessage243, IsrMessage244, \
-		IsrMessage245, IsrMessage246, IsrMessage247, IsrMessage248, IsrMessage249, IsrMessage250, \
-		IsrMessage251, IsrMessage252, IsrMessage253, IsrMessage254, IsrMessage255, \
+	isr_messages: dd isr_message_0, isr_message_1, isr_message_2, isr_message_3, isr_message_4, \
+		isr_message_5, isr_message_6, isr_message_7, isr_message_8, isr_message_9, isr_message_10, \
+		isr_message_11, isr_message_12, isr_message_13, isr_message_14, isr_message_15, isr_message_16, \
+		isr_message_17, isr_message_18, isr_message_19, isr_message_20, isr_message_21, isr_message_22, \
+		isr_message_23, isr_message_24, isr_message_25, isr_message_26, isr_message_27, isr_message_28, \
+		isr_message_29, isr_message_30, isr_message_31, isr_message_32, isr_message_33, isr_message_34, \
+		isr_message_35, isr_message_36, isr_message_37, isr_message_38, isr_message_39, isr_message_40, \
+		isr_message_41, isr_message_42, isr_message_43, isr_message_44, isr_message_45, isr_message_46, \
+		isr_message_47, isr_message_48, isr_message_49, isr_message_50, isr_message_51, isr_message_52, \
+		isr_message_53, isr_message_54, isr_message_55, isr_message_56, isr_message_57, isr_message_58, \
+		isr_message_59, isr_message_60, isr_message_61, isr_message_62, isr_message_63, isr_message_64, \
+		isr_message_65, isr_message_66, isr_message_67, isr_message_68, isr_message_69, isr_message_70, \
+		isr_message_71, isr_message_72, isr_message_73, isr_message_74, isr_message_75, isr_message_76, \
+		isr_message_77, isr_message_78, isr_message_79, isr_message_80, isr_message_81, isr_message_82, \
+		isr_message_83, isr_message_84, isr_message_85, isr_message_86, isr_message_87, isr_message_88, \
+		isr_message_89, isr_message_90, isr_message_91, isr_message_92, isr_message_93, isr_message_94, \
+		isr_message_95, isr_message_96, isr_message_97, isr_message_98, isr_message_99, isr_message_100, \
+		isr_message_101, isr_message_102, isr_message_103, isr_message_104, isr_message_105, isr_message_106, \
+		isr_message_107, isr_message_108, isr_message_109, isr_message_110, isr_message_111, isr_message_112, \
+		isr_message_113, isr_message_114, isr_message_115, isr_message_116, isr_message_117, isr_message_118, \
+		isr_message_119, isr_message_120, isr_message_121, isr_message_122, isr_message_123, isr_message_124, \
+		isr_message_125, isr_message_126, isr_message_127, isr_message_128, isr_message_129, isr_message_130, \
+		isr_message_131, isr_message_132, isr_message_133, isr_message_134, isr_message_135, isr_message_136, \
+		isr_message_137, isr_message_138, isr_message_139, isr_message_140, isr_message_141, isr_message_142, \
+		isr_message_143, isr_message_144, isr_message_145, isr_message_146, isr_message_147, isr_message_148, \
+		isr_message_149, isr_message_150, isr_message_151, isr_message_152, isr_message_153, isr_message_154, \
+		isr_message_155, isr_message_156, isr_message_157, isr_message_158, isr_message_159, isr_message_160, \
+		isr_message_161, isr_message_162, isr_message_163, isr_message_164, isr_message_165, isr_message_166, \
+		isr_message_167, isr_message_168, isr_message_169, isr_message_170, isr_message_171, isr_message_172, \
+		isr_message_173, isr_message_174, isr_message_175, isr_message_176, isr_message_177, isr_message_178, \
+		isr_message_179, isr_message_180, isr_message_181, isr_message_182, isr_message_183, isr_message_184, \
+		isr_message_185, isr_message_186, isr_message_187, isr_message_188, isr_message_189, isr_message_190, \
+		isr_message_191, isr_message_192, isr_message_193, isr_message_194, isr_message_195, isr_message_196, \
+		isr_message_197, isr_message_198, isr_message_199, isr_message_200, isr_message_201, isr_message_202, \
+		isr_message_203, isr_message_204, isr_message_205, isr_message_206, isr_message_207, isr_message_208, \
+		isr_message_209, isr_message_210, isr_message_211, isr_message_212, isr_message_213, isr_message_214, \
+		isr_message_215, isr_message_216, isr_message_217, isr_message_218, isr_message_219, isr_message_220, \
+		isr_message_221, isr_message_222, isr_message_223, isr_message_224, isr_message_225, isr_message_226, \
+		isr_message_227, isr_message_228, isr_message_229, isr_message_230, isr_message_231, isr_message_232, \
+		isr_message_233, isr_message_234, isr_message_235, isr_message_236, isr_message_237, isr_message_238, \
+		isr_message_239, isr_message_240, isr_message_241, isr_message_242, isr_message_243, isr_message_244, \
+		isr_message_245, isr_message_246, isr_message_247, isr_message_248, isr_message_249, isr_message_250, \
+		isr_message_251, isr_message_252, isr_message_253, isr_message_254, isr_message_255, \
 
 section .bss
-	Idt: resq IdtLength
+	idt: resq idt_length
 

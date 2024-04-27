@@ -1,70 +1,70 @@
 #include "interrupts.h"
 
-constexpr struct GdtEntry Gdt[3] = {
-	GdtEntry(0, 0, 0, 0),
+constexpr struct gdt_entry gdt[3] = {
+	gdt_entry(0, 0, 0, 0),
 
-	// Code segment spanning all of the addressable memory
-	GdtEntry(
+	// code segment spanning all of the addressable memory
+	gdt_entry(
 		0,
-		0xFF'FF'FF,
-		GdtEntryAccessPresent | GdtEntryAccessRing0 | GdtEntryAccessCode | GdtEntryAccessCodeReadable,
-		GdtEntryFlagsSegmentWidth32Bit | GdtEntryFlagsGranularity4K
+		0xff'ff'ff,
+		GDT_ENTRY_ACCESS_PRESENT | GDT_ENTRY_ACCESS_RING0 | GDT_ENTRY_ACCESS_CODE | GDT_ENTRY_ACCESS_CODE_READABLE,
+		GDT_ENTRY_FLAGS_SEGMENT_WIDTH32_BIT | GDT_ENTRY_FLAGS_GRANULARITY4_K
 	),
 
-	// Data segment spanning all of the addressable memory
-	GdtEntry(
+	// data segment spanning all of the addressable memory
+	gdt_entry(
 		0,
-		0xFF'FF'FF,
-		GdtEntryAccessPresent | GdtEntryAccessRing0 | GdtEntryAccessData | GdtEntryAccessDataWriteable | GdtEntryAccessAccessed,
-		GdtEntryFlagsSegmentWidth32Bit | GdtEntryFlagsGranularity4K
+		0xff'ff'ff,
+		GDT_ENTRY_ACCESS_PRESENT | GDT_ENTRY_ACCESS_RING0 | GDT_ENTRY_ACCESS_DATA | GDT_ENTRY_ACCESS_DATA_WRITEABLE | GDT_ENTRY_ACCESS_ACCESSED,
+		GDT_ENTRY_FLAGS_SEGMENT_WIDTH32_BIT | GDT_ENTRY_FLAGS_GRANULARITY4_K
 	),
 };
 
-struct GdtDescriptor GdtDescriptor = {
-	.gdt = Gdt,
-	.size = sizeof(Gdt) - 1,
+struct gdt_descriptor gdt_descriptor = {
+	.gdt = gdt,
+	.size = sizeof(gdt) - 1,
 };
 
-void GdtInitializeX86(void)
+void gdt_initialize_x86(void)
 {
-	// 8 and 16 because a GDT entry is 8 bytes
+	// 8 and 16 because a g_d_t entry is 8 bytes
 	// so the code entry is located 8 bytes in and the
 	// data entry 16 bytes in the table
-	GdtLoadX86(&GdtDescriptor, 8, 16);
+	gdt_load_x86(&gdt_descriptor, 8, 16);
 }
 
 // ----- IDT -----
 
 
-// #define IdtSize 256
-// struct IdtGate Idt[IdtSize];
+// #define idt_size 256
+// struct idt_gate idt[_idt_size];
 
-// To be used with the `lidt` asm function whose argument is a pointer to an IdtDescriptor
+// to be used with the `lidt` asm function whose argument is a pointer to an idt_descriptor
 // const struct [[gnu::packed]]
 // {
 // 	const u16 size;
-// 	const struct IdtGate *idt;
-// } IdtDescriptor = {
-// 	.size = (sizeof(struct IdtGate) * IdtSize) - 1,
-// 	.idt = Idt
+// 	const struct idt_gate *idt;
+// } idt_descriptor = {
+// 	.size = (sizeof(struct idt_gate) * idt_size) - 1,
+// 	.idt = idt
 // };
 //
-// void IdtGateSet(const u8 interrupt, const uintptr_t isrAddress, const enum IdtGateType type, const u8 ring)
+// void idt_gate_set(const u8 interrupt, const uintptr_t isr_address, const enum idt_gate_type type, const u8 ring)
 // {
-// 	Idt[interrupt].isrAddressLow = isrAddress & 0x00'00'FF'FF;
-// 	Idt[interrupt].isrAddressHigh = (isrAddress & 0xFF'FF'00'00) >> 16;
+// 	idt[interrupt].isr_address_low = isr_address & 0x00'00'_f_f'_f_f;
+// 	idt[interrupt].isr_address_high = (isr_address & 0x_f_f'_f_f'00'00) >> 16;
 //
-// 	Idt[interrupt]._gdtKernelCodeSegment = 8;
-// 	Idt[interrupt].type = type;
-// 	Idt[interrupt].ring = ring;
-// 	Idt[interrupt].present = true;
+// 	idt[interrupt]._gdt_kernel_code_segment = 8;
+// 	idt[interrupt].type = type;
+// 	idt[interrupt].ring = ring;
+// 	idt[interrupt].present = true;
 //
-// 	Idt[interrupt]._zero = 0;
-// 	Idt[interrupt]._zero2 = 0;
+// 	idt[interrupt]._zero = 0;
+// 	idt[interrupt]._zero2 = 0;
 // }
 
-// void IdtInitializeX86(void)
+// void idt_initialize_x86(void)
 // {
-// 	IdtGateSet(0,   (uintptr_t)Isr0,   IdtGateType32BitTrap, 0);
-// 	IdtLoadX86();
+// 	idt_gate_set(0,   (uintptr_t)_isr0,   idt_gate_type32_bit_trap, 0);
+// 	idt_load_x86();
 // }
