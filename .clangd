@@ -1,8 +1,8 @@
 CompileFlags:
   Add: [
+    -I/persistent/home/user/.local/bin/LigmaOS/src/kernel,
     -I/persistent/home/user/.local/bin/LigmaOS/src/kernel/library,
     -I/persistent/home/user/.local/bin/LigmaOS/src/libc,
-    -I/persistent/home/user/.local/bin/LigmaOS/src/boot/multiboot,
     -xc,
     -std=c2x,
     -ffreestanding,

@@ -1,7 +1,7 @@
 #pragma once
 #include <types.h>
 #include <string.h>
-#include <multiboot1.h>
+#include <multiboot/multiboot1.h>
 #include "font_bitmap.h"
 
 
@@ -29,9 +29,6 @@
 #define BANNER_Y VERTICAL_TERMINAL_BORDER_SIZE-68
 
 #define CURSOR_BITMAP_INDEX 63
-
-
-
 
 static enum basic_color{
     WHITE=0x00FFFFFF,

@@ -10,7 +10,8 @@
 #include "graphics/vbe_graphics.h"
 #include "architecture/x86/32/interrupts.h"
 #include <stdio.h>
-#include <multiboot1.h>
+#include <multiboot/multiboot1.h>
+#include <drivers/PS2_8042.h>
 
 void* fb;
 u32 pitch;
@@ -26,15 +27,11 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	gdt_initialize_x86();
 	idt_load_x86();
 
-	terminal_initialize();
-	__asm("int $255");
-    
-    fb = (void*)multiboot_info->framebuffer.address;
-    pitch=multiboot_info->framebuffer.pitch;
-    flags=multiboot_info->flags;
-    
-    
-    put_main_window();
+	fb = (void*)multiboot_info->framebuffer.address;
+	pitch=multiboot_info->framebuffer.pitch;
+	flags=multiboot_info->flags;
+
+	put_main_window();
 }
 
 

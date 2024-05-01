@@ -31,7 +31,7 @@ void terminal_initialize(void)
 	terminal_put_prompt();
 	const u16 entry = vga_text_mode_entry(' ', vga_text_mode.color);
 
-	// todo: use memset
+	// TODO: use memset
 	for (u8 y = 1; y < vga_text_mode.height; ++y) {
 		for (u8 x = 0; x < vga_text_mode.width; ++x) {
 			const u16 index = y * vga_text_mode.width + x;
