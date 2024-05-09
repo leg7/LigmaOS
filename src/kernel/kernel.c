@@ -7,6 +7,7 @@
 #endif
 
 #include "graphics/vga_text_mode.h"
+#include "graphics/vbe_graphics.h"
 #include "architecture/x86/32/interrupts.h"
 #include <stdio.h>
 #include <multiboot1.h>
@@ -21,87 +22,23 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	idt_load_x86();
 
 	terminal_initialize();
-	puts("Hey, you. You're finally awake\n");
+	//puts("Hey, you. You're finally awake\n");
 	__asm("int $255");
 
-	if (multiboot_info->flags & (1 << 12))
-	{
-		u32 color;
-		u32 i;
-		void *fb = (void*)multiboot_info->framebuffer.address;
+	//if (multiboot_info->flags & (1 << 12)){
+    struct graphics_info graphics_info= graphics_info_init(multiboot_info);
+    switch_color_32bpp(&graphics_info,FUCHSIA);
 
-		switch (multiboot_info->framebuffer.type)
-		{
-			case MULTIBOOT_INFO_FRAMEBUFFER_TYPE_INDEXED:
-				{
-					unsigned best_distance, distance;
-					struct multiboot_color *palette = multiboot_info->framebuffer_palette_address;
-
-					color = 0;
-					best_distance = 4*256*256;
-
-					for (i = 0; i < multiboot_info->framebuffer_palette_num_colors; i++)
-					{
-						distance = (0xff - palette[i].blue) * (0xff - palette[i].blue)
-							+ palette[i].red * palette[i].red
-							+ palette[i].green * palette[i].green;
-						if (distance < best_distance)
-						{
-							color = i;
-							best_distance = distance;
-						}
-					}
-				}
-				break;
-
-			case MULTIBOOT_INFO_FRAMEBUFFER_TYPE_RGB:
-				color = ((1 << multiboot_info->framebuffer_blue_mask_size) - 1)
-					<< multiboot_info->framebuffer_blue_field_position;
-				break;
-
-			case MULTIBOOT_INFO_FRAMEBUFFER_TYPE_EGA_TEXT:
-				color = '\\' | 0x0100;
-				break;
-
-			default:
-				color = 0xffffffff;
-				break;
-		}
-		for (i = 0; i < multiboot_info->framebuffer.width
-		&& i < multiboot_info->framebuffer.height; i++)
-		{
-			switch (multiboot_info->framebuffer.bpp)
-			{
-				case 8:
-					{
-						u8 *pixel = fb + multiboot_info->framebuffer.pitch * i + i;
-						*pixel = color;
-					}
-					break;
-				case 15:
-				case 16:
-					{
-						u16 *pixel = fb + multiboot_info->framebuffer.pitch * i + 2 * i;
-						*pixel = color;
-					}
-					break;
-				case 24:
-					{
-						u32 *pixel = fb + multiboot_info->framebuffer.pitch * i + 3 * i;
-						*pixel = (color & 0xffffff) | (*pixel & 0xff000000);
-					}
-					break;
-
-				case 32:
-					{
-						u32 *pixel = fb + multiboot_info->framebuffer.pitch * i + 4 * i;
-						*pixel = color;
-					}
-					break;
-			}
-		}
-	}
-
+    put_banner(multiboot_info,graphics_info,"  LigmaOS    ");
+    graphics_info.cursor_x=8;
+    graphics_info.cursor_y=80;
+    switch_color_32bpp(&graphics_info,RED);
+    put_string(multiboot_info,graphics_info,"  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there !  Hello there ! ");
+    
+    
+    
+ 
 }
+
 
 
