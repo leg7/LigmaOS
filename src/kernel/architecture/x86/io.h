@@ -17,3 +17,4 @@
 #	define x86_in_32(PORT)		x86_32_in_32(PORT)
 #endif
 
+void x86_io_wait(void);
