@@ -24,8 +24,10 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 		return;
 	}
 
-	gdt_initialize_x86();
-	idt_load_x86();
+	IRQ_disable();
+
+	GDT_initialize_x86();
+	IDT_load_x86();
 
 	fb = (void*)multiboot_info->framebuffer.address;
 	pitch=multiboot_info->framebuffer.pitch;
