@@ -6,17 +6,20 @@
 #error "This needs to be compiled with an ix86-elf compiler"
 #endif
 
-#include "graphics/vga_text_mode.h"
-#include "graphics/vbe_graphics.h"
-#include "architecture/x86/32/interrupts.h"
+
 #include <stdio.h>
+#include "graphics/vbe_graphics.h"
 #include <multiboot/multiboot1.h>
 #include <drivers/PS2_8042.h>
+#include <drivers/PIC_8259A.h>
+#include <architecture/x86/32/gdt.h>
+#include <architecture/x86/32/idt.h>
+#include <architecture/x86/32/isr.h>
+#include <architecture/x86/32/irq.h>
 
 void* fb;
 u32 pitch;
 u32 flags;
-
 
 void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multiboot_info)
 {
@@ -26,8 +29,8 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 
 	IRQ_disable();
 
-	GDT_initialize_x86();
-	IDT_load_x86();
+	GDT_initialize();
+	IDT_initialize();
 
 	fb = (void*)multiboot_info->framebuffer.address;
 	pitch=multiboot_info->framebuffer.pitch;
