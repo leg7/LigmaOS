@@ -18,7 +18,7 @@ IRQ_disable:
 ; -------------------- ISRs --------------------
 
 ISR_load_kernel_data_segment:
-	mov eax, 16 ; kernel data segment selector in g_d_t
+	mov eax, 16 ; kernel data segment selector in GDT
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
@@ -196,262 +196,262 @@ section .rodata
 		ISR236, ISR237, ISR238, ISR239, ISR240, ISR241, ISR242, ISR243, ISR244, ISR245, ISR246, ISR247, ISR248, \
 		ISR249, ISR250, ISR251, ISR252, ISR253, ISR254, ISR255
 
-	ISR_message_0:   db "division by 0", 0
-	ISR_message_1:   db "debug", 0
-	ISR_message_2:   db "non-maskable interrupt", 0
-	ISR_message_3:   db "breakpoint", 0
-	ISR_message_4:   db "overflow", 0
-	ISR_message_5:   db "bound range exceeded", 0
-	ISR_message_6:   db "invalid opcode", 0
-	ISR_message_7:   db "device not available", 0
-	ISR_message_8:   db "double fault", 0
-	ISR_message_9:   db "coprocessor segment overrun", 0
-	ISR_message_10:  db "invalid t_s_s", 0
-	ISR_message_11:  db "segment not present", 0
-	ISR_message_12:  db "stack-_segment fault", 0
-	ISR_message_13:  db "general protection fault", 0
-	ISR_message_14:  db "page fault", 0
-	ISR_message_15:  db "reserved", 0
-	ISR_message_16:  db "x87 floating-_point exception", 0
-	ISR_message_17:  db "alignment check", 0
-	ISR_message_18:  db "machine check", 0
-	ISR_message_19:  db "s_i_m_d floating-_point exception", 0
-	ISR_message_20:  db "virtualization exception", 0
-	ISR_message_21:  db "control protection exception", 0
-	ISR_message_22:  db "reserved", 0
-	ISR_message_23:  db "reserved", 0
-	ISR_message_24:  db "reserved", 0
-	ISR_message_25:  db "reserved", 0
-	ISR_message_26:  db "reserved", 0
-	ISR_message_27:  db "reserved", 0
-	ISR_message_28:  db "hypervisor injection exception", 0
-	ISR_message_29:  db "v_m_m communication exception", 0
-	ISR_message_30:  db "security exception", 0
-	ISR_message_31:  db "reserved", 0
-	ISR_message_32:  db "testing for 32",  0
-	ISR_message_33:  db "testing for 33",  0
-	ISR_message_34:  db "testing for 34",  0
-	ISR_message_35:  db "testing for 35",  0
-	ISR_message_36:  db "testing for 36",  0
-	ISR_message_37:  db "testing for 37",  0
-	ISR_message_38:  db "testing for 38",  0
-	ISR_message_39:  db "testing for 39",  0
-	ISR_message_40:  db "testing for 40",  0
-	ISR_message_41:  db "testing for 41",  0
-	ISR_message_42:  db "testing for 42",  0
-	ISR_message_43:  db "testing for 43",  0
-	ISR_message_44:  db "testing for 44",  0
-	ISR_message_45:  db "testing for 45",  0
-	ISR_message_46:  db "testing for 46",  0
-	ISR_message_47:  db "testing for 47",  0
-	ISR_message_48:  db "testing for 48",  0
-	ISR_message_49:  db "testing for 49",  0
-	ISR_message_50:  db "testing for 50",  0
-	ISR_message_51:  db "testing for 51",  0
-	ISR_message_52:  db "testing for 52",  0
-	ISR_message_53:  db "testing for 53",  0
-	ISR_message_54:  db "testing for 54",  0
-	ISR_message_55:  db "testing for 55",  0
-	ISR_message_56:  db "testing for 56",  0
-	ISR_message_57:  db "testing for 57",  0
-	ISR_message_58:  db "testing for 58",  0
-	ISR_message_59:  db "testing for 59",  0
-	ISR_message_60:  db "testing for 60",  0
-	ISR_message_61:  db "testing for 61",  0
-	ISR_message_62:  db "testing for 62",  0
-	ISR_message_63:  db "testing for 63",  0
-	ISR_message_64:  db "testing for 64",  0
-	ISR_message_65:  db "testing for 65",  0
-	ISR_message_66:  db "testing for 66",  0
-	ISR_message_67:  db "testing for 67",  0
-	ISR_message_68:  db "testing for 68",  0
-	ISR_message_69:  db "testing for 69",  0
-	ISR_message_70:  db "testing for 70",  0
-	ISR_message_71:  db "testing for 71",  0
-	ISR_message_72:  db "testing for 72",  0
-	ISR_message_73:  db "testing for 73",  0
-	ISR_message_74:  db "testing for 74",  0
-	ISR_message_75:  db "testing for 75",  0
-	ISR_message_76:  db "testing for 76",  0
-	ISR_message_77:  db "testing for 77",  0
-	ISR_message_78:  db "testing for 78",  0
-	ISR_message_79:  db "testing for 79",  0
-	ISR_message_80:  db "testing for 80",  0
-	ISR_message_81:  db "testing for 81",  0
-	ISR_message_82:  db "testing for 82",  0
-	ISR_message_83:  db "testing for 83",  0
-	ISR_message_84:  db "testing for 84",  0
-	ISR_message_85:  db "testing for 85",  0
-	ISR_message_86:  db "testing for 86",  0
-	ISR_message_87:  db "testing for 87",  0
-	ISR_message_88:  db "testing for 88",  0
-	ISR_message_89:  db "testing for 89",  0
-	ISR_message_90:  db "testing for 90",  0
-	ISR_message_91:  db "testing for 91",  0
-	ISR_message_92:  db "testing for 92",  0
-	ISR_message_93:  db "testing for 93",  0
-	ISR_message_94:  db "testing for 94",  0
-	ISR_message_95:  db "testing for 95",  0
-	ISR_message_96:  db "testing for 96",  0
-	ISR_message_97:  db "testing for 97",  0
-	ISR_message_98:  db "testing for 98",  0
-	ISR_message_99:  db "testing for 99",  0
-	ISR_message_100: db "testing for 100", 0
-	ISR_message_101: db "testing for 101", 0
-	ISR_message_102: db "testing for 102", 0
-	ISR_message_103: db "testing for 103", 0
-	ISR_message_104: db "testing for 104", 0
-	ISR_message_105: db "testing for 105", 0
-	ISR_message_106: db "testing for 106", 0
-	ISR_message_107: db "testing for 107", 0
-	ISR_message_108: db "testing for 108", 0
-	ISR_message_109: db "testing for 109", 0
-	ISR_message_110: db "testing for 110", 0
-	ISR_message_111: db "testing for 111", 0
-	ISR_message_112: db "testing for 112", 0
-	ISR_message_113: db "testing for 113", 0
-	ISR_message_114: db "testing for 114", 0
-	ISR_message_115: db "testing for 115", 0
-	ISR_message_116: db "testing for 116", 0
-	ISR_message_117: db "testing for 117", 0
-	ISR_message_118: db "testing for 118", 0
-	ISR_message_119: db "testing for 119", 0
-	ISR_message_120: db "testing for 120", 0
-	ISR_message_121: db "testing for 121", 0
-	ISR_message_122: db "testing for 122", 0
-	ISR_message_123: db "testing for 123", 0
-	ISR_message_124: db "testing for 124", 0
-	ISR_message_125: db "testing for 125", 0
-	ISR_message_126: db "testing for 126", 0
-	ISR_message_127: db "testing for 127", 0
-	ISR_message_128: db "testing for 128", 0
-	ISR_message_129: db "testing for 129", 0
-	ISR_message_130: db "testing for 130", 0
-	ISR_message_131: db "testing for 131", 0
-	ISR_message_132: db "testing for 132", 0
-	ISR_message_133: db "testing for 133", 0
-	ISR_message_134: db "testing for 134", 0
-	ISR_message_135: db "testing for 135", 0
-	ISR_message_136: db "testing for 136", 0
-	ISR_message_137: db "testing for 137", 0
-	ISR_message_138: db "testing for 138", 0
-	ISR_message_139: db "testing for 139", 0
-	ISR_message_140: db "testing for 140", 0
-	ISR_message_141: db "testing for 141", 0
-	ISR_message_142: db "testing for 142", 0
-	ISR_message_143: db "testing for 143", 0
-	ISR_message_144: db "testing for 144", 0
-	ISR_message_145: db "testing for 145", 0
-	ISR_message_146: db "testing for 146", 0
-	ISR_message_147: db "testing for 147", 0
-	ISR_message_148: db "testing for 148", 0
-	ISR_message_149: db "testing for 149", 0
-	ISR_message_150: db "testing for 150", 0
-	ISR_message_151: db "testing for 151", 0
-	ISR_message_152: db "testing for 152", 0
-	ISR_message_153: db "testing for 153", 0
-	ISR_message_154: db "testing for 154", 0
-	ISR_message_155: db "testing for 155", 0
-	ISR_message_156: db "testing for 156", 0
-	ISR_message_157: db "testing for 157", 0
-	ISR_message_158: db "testing for 158", 0
-	ISR_message_159: db "testing for 159", 0
-	ISR_message_160: db "testing for 160", 0
-	ISR_message_161: db "testing for 161", 0
-	ISR_message_162: db "testing for 162", 0
-	ISR_message_163: db "testing for 163", 0
-	ISR_message_164: db "testing for 164", 0
-	ISR_message_165: db "testing for 165", 0
-	ISR_message_166: db "testing for 166", 0
-	ISR_message_167: db "testing for 167", 0
-	ISR_message_168: db "testing for 168", 0
-	ISR_message_169: db "testing for 169", 0
-	ISR_message_170: db "testing for 170", 0
-	ISR_message_171: db "testing for 171", 0
-	ISR_message_172: db "testing for 172", 0
-	ISR_message_173: db "testing for 173", 0
-	ISR_message_174: db "testing for 174", 0
-	ISR_message_175: db "testing for 175", 0
-	ISR_message_176: db "testing for 176", 0
-	ISR_message_177: db "testing for 177", 0
-	ISR_message_178: db "testing for 178", 0
-	ISR_message_179: db "testing for 179", 0
-	ISR_message_180: db "testing for 180", 0
-	ISR_message_181: db "testing for 181", 0
-	ISR_message_182: db "testing for 182", 0
-	ISR_message_183: db "testing for 183", 0
-	ISR_message_184: db "testing for 184", 0
-	ISR_message_185: db "testing for 185", 0
-	ISR_message_186: db "testing for 186", 0
-	ISR_message_187: db "testing for 187", 0
-	ISR_message_188: db "testing for 188", 0
-	ISR_message_189: db "testing for 189", 0
-	ISR_message_190: db "testing for 190", 0
-	ISR_message_191: db "testing for 191", 0
-	ISR_message_192: db "testing for 192", 0
-	ISR_message_193: db "testing for 193", 0
-	ISR_message_194: db "testing for 194", 0
-	ISR_message_195: db "testing for 195", 0
-	ISR_message_196: db "testing for 196", 0
-	ISR_message_197: db "testing for 197", 0
-	ISR_message_198: db "testing for 198", 0
-	ISR_message_199: db "testing for 199", 0
-	ISR_message_200: db "testing for 200", 0
-	ISR_message_201: db "testing for 201", 0
-	ISR_message_202: db "testing for 202", 0
-	ISR_message_203: db "testing for 203", 0
-	ISR_message_204: db "testing for 204", 0
-	ISR_message_205: db "testing for 205", 0
-	ISR_message_206: db "testing for 206", 0
-	ISR_message_207: db "testing for 207", 0
-	ISR_message_208: db "testing for 208", 0
-	ISR_message_209: db "testing for 209", 0
-	ISR_message_210: db "testing for 210", 0
-	ISR_message_211: db "testing for 211", 0
-	ISR_message_212: db "testing for 212", 0
-	ISR_message_213: db "testing for 213", 0
-	ISR_message_214: db "testing for 214", 0
-	ISR_message_215: db "testing for 215", 0
-	ISR_message_216: db "testing for 216", 0
-	ISR_message_217: db "testing for 217", 0
-	ISR_message_218: db "testing for 218", 0
-	ISR_message_219: db "testing for 219", 0
-	ISR_message_220: db "testing for 220", 0
-	ISR_message_221: db "testing for 221", 0
-	ISR_message_222: db "testing for 222", 0
-	ISR_message_223: db "testing for 223", 0
-	ISR_message_224: db "testing for 224", 0
-	ISR_message_225: db "testing for 225", 0
-	ISR_message_226: db "testing for 226", 0
-	ISR_message_227: db "testing for 227", 0
-	ISR_message_228: db "testing for 228", 0
-	ISR_message_229: db "testing for 229", 0
-	ISR_message_230: db "testing for 230", 0
-	ISR_message_231: db "testing for 231", 0
-	ISR_message_232: db "testing for 232", 0
-	ISR_message_233: db "testing for 233", 0
-	ISR_message_234: db "testing for 234", 0
-	ISR_message_235: db "testing for 235", 0
-	ISR_message_236: db "testing for 236", 0
-	ISR_message_237: db "testing for 237", 0
-	ISR_message_238: db "testing for 238", 0
-	ISR_message_239: db "testing for 239", 0
-	ISR_message_240: db "testing for 240", 0
-	ISR_message_241: db "testing for 241", 0
-	ISR_message_242: db "testing for 242", 0
-	ISR_message_243: db "testing for 243", 0
-	ISR_message_244: db "testing for 244", 0
-	ISR_message_245: db "testing for 245", 0
-	ISR_message_246: db "testing for 246", 0
-	ISR_message_247: db "testing for 247", 0
-	ISR_message_248: db "testing for 248", 0
-	ISR_message_249: db "testing for 249", 0
-	ISR_message_250: db "testing for 250", 0
-	ISR_message_251: db "testing for 251", 0
-	ISR_message_252: db "testing for 252", 0
-	ISR_message_253: db "testing for 253", 0
-	ISR_message_254: db "testing for 254", 0
-	ISR_message_255: db "testing for 255", 0
+	ISR_message_0:   db "Exception 0: Division by 0", 0
+	ISR_message_1:   db "Exception 1: Debug", 0
+	ISR_message_2:   db "Exception 2: Non-maskable interrupt", 0
+	ISR_message_3:   db "Exception 3: Breakpoint", 0
+	ISR_message_4:   db "Exception 4: Overflow", 0
+	ISR_message_5:   db "Exception 5: Bound range exceeded", 0
+	ISR_message_6:   db "Exception 6: Invalid opcode", 0
+	ISR_message_7:   db "Exception 7: Device not available", 0
+	ISR_message_8:   db "Exception 8: Double fault", 0
+	ISR_message_9:   db "Exception 9: Coprocessor segment overrun", 0
+	ISR_message_10:  db "Exception 10: Invalid TSS", 0
+	ISR_message_11:  db "Exception 11: Segment not present", 0
+	ISR_message_12:  db "Exception 12: Stack segment fault", 0
+	ISR_message_13:  db "Exception 13: General protection fault", 0
+	ISR_message_14:  db "Exception 14: Page fault", 0
+	ISR_message_15:  db "Exception 15: Reserved", 0
+	ISR_message_16:  db "Exception 16: x87 floating point exception", 0
+	ISR_message_17:  db "Exception 17: Alignment check", 0
+	ISR_message_18:  db "Exception 18: Machine check", 0
+	ISR_message_19:  db "Exception 19: SIMD floating point exception", 0
+	ISR_message_20:  db "Exception 20: Virtualization exception", 0
+	ISR_message_21:  db "Exception 21: Control protection exception", 0
+	ISR_message_22:  db "Exception 22: Reserved", 0
+	ISR_message_23:  db "Exception 23: Reserved", 0
+	ISR_message_24:  db "Exception 24: Reserved", 0
+	ISR_message_25:  db "Exception 25: Reserved", 0
+	ISR_message_26:  db "Exception 26: Reserved", 0
+	ISR_message_27:  db "Exception 27: Reserved", 0
+	ISR_message_28:  db "Exception 28: Hypervisor injection exception", 0
+	ISR_message_29:  db "Exception 29: VMM communication exception", 0
+	ISR_message_30:  db "Exception 30: Security exception", 0
+	ISR_message_31:  db "Exception 31: Reserved", 0
+	ISR_message_32:  db "Unhandeled IRQ 32",  0
+	ISR_message_33:  db "Unhandeled IRQ 33",  0
+	ISR_message_34:  db "Unhandeled IRQ 34",  0
+	ISR_message_35:  db "Unhandeled IRQ 35",  0
+	ISR_message_36:  db "Unhandeled IRQ 36",  0
+	ISR_message_37:  db "Unhandeled IRQ 37",  0
+	ISR_message_38:  db "Unhandeled IRQ 38",  0
+	ISR_message_39:  db "Unhandeled IRQ 39",  0
+	ISR_message_40:  db "Unhandeled IRQ 40",  0
+	ISR_message_41:  db "Unhandeled IRQ 41",  0
+	ISR_message_42:  db "Unhandeled IRQ 42",  0
+	ISR_message_43:  db "Unhandeled IRQ 43",  0
+	ISR_message_44:  db "Unhandeled IRQ 44",  0
+	ISR_message_45:  db "Unhandeled IRQ 45",  0
+	ISR_message_46:  db "Unhandeled IRQ 46",  0
+	ISR_message_47:  db "Unhandeled IRQ 47",  0
+	ISR_message_48:  db "Unhandeled IRQ 48",  0
+	ISR_message_49:  db "Unhandeled IRQ 49",  0
+	ISR_message_50:  db "Unhandeled IRQ 50",  0
+	ISR_message_51:  db "Unhandeled IRQ 51",  0
+	ISR_message_52:  db "Unhandeled IRQ 52",  0
+	ISR_message_53:  db "Unhandeled IRQ 53",  0
+	ISR_message_54:  db "Unhandeled IRQ 54",  0
+	ISR_message_55:  db "Unhandeled IRQ 55",  0
+	ISR_message_56:  db "Unhandeled IRQ 56",  0
+	ISR_message_57:  db "Unhandeled IRQ 57",  0
+	ISR_message_58:  db "Unhandeled IRQ 58",  0
+	ISR_message_59:  db "Unhandeled IRQ 59",  0
+	ISR_message_60:  db "Unhandeled IRQ 60",  0
+	ISR_message_61:  db "Unhandeled IRQ 61",  0
+	ISR_message_62:  db "Unhandeled IRQ 62",  0
+	ISR_message_63:  db "Unhandeled IRQ 63",  0
+	ISR_message_64:  db "Unhandeled IRQ 64",  0
+	ISR_message_65:  db "Unhandeled IRQ 65",  0
+	ISR_message_66:  db "Unhandeled IRQ 66",  0
+	ISR_message_67:  db "Unhandeled IRQ 67",  0
+	ISR_message_68:  db "Unhandeled IRQ 68",  0
+	ISR_message_69:  db "Unhandeled IRQ 69",  0
+	ISR_message_70:  db "Unhandeled IRQ 70",  0
+	ISR_message_71:  db "Unhandeled IRQ 71",  0
+	ISR_message_72:  db "Unhandeled IRQ 72",  0
+	ISR_message_73:  db "Unhandeled IRQ 73",  0
+	ISR_message_74:  db "Unhandeled IRQ 74",  0
+	ISR_message_75:  db "Unhandeled IRQ 75",  0
+	ISR_message_76:  db "Unhandeled IRQ 76",  0
+	ISR_message_77:  db "Unhandeled IRQ 77",  0
+	ISR_message_78:  db "Unhandeled IRQ 78",  0
+	ISR_message_79:  db "Unhandeled IRQ 79",  0
+	ISR_message_80:  db "Unhandeled IRQ 80",  0
+	ISR_message_81:  db "Unhandeled IRQ 81",  0
+	ISR_message_82:  db "Unhandeled IRQ 82",  0
+	ISR_message_83:  db "Unhandeled IRQ 83",  0
+	ISR_message_84:  db "Unhandeled IRQ 84",  0
+	ISR_message_85:  db "Unhandeled IRQ 85",  0
+	ISR_message_86:  db "Unhandeled IRQ 86",  0
+	ISR_message_87:  db "Unhandeled IRQ 87",  0
+	ISR_message_88:  db "Unhandeled IRQ 88",  0
+	ISR_message_89:  db "Unhandeled IRQ 89",  0
+	ISR_message_90:  db "Unhandeled IRQ 90",  0
+	ISR_message_91:  db "Unhandeled IRQ 91",  0
+	ISR_message_92:  db "Unhandeled IRQ 92",  0
+	ISR_message_93:  db "Unhandeled IRQ 93",  0
+	ISR_message_94:  db "Unhandeled IRQ 94",  0
+	ISR_message_95:  db "Unhandeled IRQ 95",  0
+	ISR_message_96:  db "Unhandeled IRQ 96",  0
+	ISR_message_97:  db "Unhandeled IRQ 97",  0
+	ISR_message_98:  db "Unhandeled IRQ 98",  0
+	ISR_message_99:  db "Unhandeled IRQ 99",  0
+	ISR_message_100: db "Unhandeled IRQ 100", 0
+	ISR_message_101: db "Unhandeled IRQ 101", 0
+	ISR_message_102: db "Unhandeled IRQ 102", 0
+	ISR_message_103: db "Unhandeled IRQ 103", 0
+	ISR_message_104: db "Unhandeled IRQ 104", 0
+	ISR_message_105: db "Unhandeled IRQ 105", 0
+	ISR_message_106: db "Unhandeled IRQ 106", 0
+	ISR_message_107: db "Unhandeled IRQ 107", 0
+	ISR_message_108: db "Unhandeled IRQ 108", 0
+	ISR_message_109: db "Unhandeled IRQ 109", 0
+	ISR_message_110: db "Unhandeled IRQ 110", 0
+	ISR_message_111: db "Unhandeled IRQ 111", 0
+	ISR_message_112: db "Unhandeled IRQ 112", 0
+	ISR_message_113: db "Unhandeled IRQ 113", 0
+	ISR_message_114: db "Unhandeled IRQ 114", 0
+	ISR_message_115: db "Unhandeled IRQ 115", 0
+	ISR_message_116: db "Unhandeled IRQ 116", 0
+	ISR_message_117: db "Unhandeled IRQ 117", 0
+	ISR_message_118: db "Unhandeled IRQ 118", 0
+	ISR_message_119: db "Unhandeled IRQ 119", 0
+	ISR_message_120: db "Unhandeled IRQ 120", 0
+	ISR_message_121: db "Unhandeled IRQ 121", 0
+	ISR_message_122: db "Unhandeled IRQ 122", 0
+	ISR_message_123: db "Unhandeled IRQ 123", 0
+	ISR_message_124: db "Unhandeled IRQ 124", 0
+	ISR_message_125: db "Unhandeled IRQ 125", 0
+	ISR_message_126: db "Unhandeled IRQ 126", 0
+	ISR_message_127: db "Unhandeled IRQ 127", 0
+	ISR_message_128: db "Unhandeled IRQ 128", 0
+	ISR_message_129: db "Unhandeled IRQ 129", 0
+	ISR_message_130: db "Unhandeled IRQ 130", 0
+	ISR_message_131: db "Unhandeled IRQ 131", 0
+	ISR_message_132: db "Unhandeled IRQ 132", 0
+	ISR_message_133: db "Unhandeled IRQ 133", 0
+	ISR_message_134: db "Unhandeled IRQ 134", 0
+	ISR_message_135: db "Unhandeled IRQ 135", 0
+	ISR_message_136: db "Unhandeled IRQ 136", 0
+	ISR_message_137: db "Unhandeled IRQ 137", 0
+	ISR_message_138: db "Unhandeled IRQ 138", 0
+	ISR_message_139: db "Unhandeled IRQ 139", 0
+	ISR_message_140: db "Unhandeled IRQ 140", 0
+	ISR_message_141: db "Unhandeled IRQ 141", 0
+	ISR_message_142: db "Unhandeled IRQ 142", 0
+	ISR_message_143: db "Unhandeled IRQ 143", 0
+	ISR_message_144: db "Unhandeled IRQ 144", 0
+	ISR_message_145: db "Unhandeled IRQ 145", 0
+	ISR_message_146: db "Unhandeled IRQ 146", 0
+	ISR_message_147: db "Unhandeled IRQ 147", 0
+	ISR_message_148: db "Unhandeled IRQ 148", 0
+	ISR_message_149: db "Unhandeled IRQ 149", 0
+	ISR_message_150: db "Unhandeled IRQ 150", 0
+	ISR_message_151: db "Unhandeled IRQ 151", 0
+	ISR_message_152: db "Unhandeled IRQ 152", 0
+	ISR_message_153: db "Unhandeled IRQ 153", 0
+	ISR_message_154: db "Unhandeled IRQ 154", 0
+	ISR_message_155: db "Unhandeled IRQ 155", 0
+	ISR_message_156: db "Unhandeled IRQ 156", 0
+	ISR_message_157: db "Unhandeled IRQ 157", 0
+	ISR_message_158: db "Unhandeled IRQ 158", 0
+	ISR_message_159: db "Unhandeled IRQ 159", 0
+	ISR_message_160: db "Unhandeled IRQ 160", 0
+	ISR_message_161: db "Unhandeled IRQ 161", 0
+	ISR_message_162: db "Unhandeled IRQ 162", 0
+	ISR_message_163: db "Unhandeled IRQ 163", 0
+	ISR_message_164: db "Unhandeled IRQ 164", 0
+	ISR_message_165: db "Unhandeled IRQ 165", 0
+	ISR_message_166: db "Unhandeled IRQ 166", 0
+	ISR_message_167: db "Unhandeled IRQ 167", 0
+	ISR_message_168: db "Unhandeled IRQ 168", 0
+	ISR_message_169: db "Unhandeled IRQ 169", 0
+	ISR_message_170: db "Unhandeled IRQ 170", 0
+	ISR_message_171: db "Unhandeled IRQ 171", 0
+	ISR_message_172: db "Unhandeled IRQ 172", 0
+	ISR_message_173: db "Unhandeled IRQ 173", 0
+	ISR_message_174: db "Unhandeled IRQ 174", 0
+	ISR_message_175: db "Unhandeled IRQ 175", 0
+	ISR_message_176: db "Unhandeled IRQ 176", 0
+	ISR_message_177: db "Unhandeled IRQ 177", 0
+	ISR_message_178: db "Unhandeled IRQ 178", 0
+	ISR_message_179: db "Unhandeled IRQ 179", 0
+	ISR_message_180: db "Unhandeled IRQ 180", 0
+	ISR_message_181: db "Unhandeled IRQ 181", 0
+	ISR_message_182: db "Unhandeled IRQ 182", 0
+	ISR_message_183: db "Unhandeled IRQ 183", 0
+	ISR_message_184: db "Unhandeled IRQ 184", 0
+	ISR_message_185: db "Unhandeled IRQ 185", 0
+	ISR_message_186: db "Unhandeled IRQ 186", 0
+	ISR_message_187: db "Unhandeled IRQ 187", 0
+	ISR_message_188: db "Unhandeled IRQ 188", 0
+	ISR_message_189: db "Unhandeled IRQ 189", 0
+	ISR_message_190: db "Unhandeled IRQ 190", 0
+	ISR_message_191: db "Unhandeled IRQ 191", 0
+	ISR_message_192: db "Unhandeled IRQ 192", 0
+	ISR_message_193: db "Unhandeled IRQ 193", 0
+	ISR_message_194: db "Unhandeled IRQ 194", 0
+	ISR_message_195: db "Unhandeled IRQ 195", 0
+	ISR_message_196: db "Unhandeled IRQ 196", 0
+	ISR_message_197: db "Unhandeled IRQ 197", 0
+	ISR_message_198: db "Unhandeled IRQ 198", 0
+	ISR_message_199: db "Unhandeled IRQ 199", 0
+	ISR_message_200: db "Unhandeled IRQ 200", 0
+	ISR_message_201: db "Unhandeled IRQ 201", 0
+	ISR_message_202: db "Unhandeled IRQ 202", 0
+	ISR_message_203: db "Unhandeled IRQ 203", 0
+	ISR_message_204: db "Unhandeled IRQ 204", 0
+	ISR_message_205: db "Unhandeled IRQ 205", 0
+	ISR_message_206: db "Unhandeled IRQ 206", 0
+	ISR_message_207: db "Unhandeled IRQ 207", 0
+	ISR_message_208: db "Unhandeled IRQ 208", 0
+	ISR_message_209: db "Unhandeled IRQ 209", 0
+	ISR_message_210: db "Unhandeled IRQ 210", 0
+	ISR_message_211: db "Unhandeled IRQ 211", 0
+	ISR_message_212: db "Unhandeled IRQ 212", 0
+	ISR_message_213: db "Unhandeled IRQ 213", 0
+	ISR_message_214: db "Unhandeled IRQ 214", 0
+	ISR_message_215: db "Unhandeled IRQ 215", 0
+	ISR_message_216: db "Unhandeled IRQ 216", 0
+	ISR_message_217: db "Unhandeled IRQ 217", 0
+	ISR_message_218: db "Unhandeled IRQ 218", 0
+	ISR_message_219: db "Unhandeled IRQ 219", 0
+	ISR_message_220: db "Unhandeled IRQ 220", 0
+	ISR_message_221: db "Unhandeled IRQ 221", 0
+	ISR_message_222: db "Unhandeled IRQ 222", 0
+	ISR_message_223: db "Unhandeled IRQ 223", 0
+	ISR_message_224: db "Unhandeled IRQ 224", 0
+	ISR_message_225: db "Unhandeled IRQ 225", 0
+	ISR_message_226: db "Unhandeled IRQ 226", 0
+	ISR_message_227: db "Unhandeled IRQ 227", 0
+	ISR_message_228: db "Unhandeled IRQ 228", 0
+	ISR_message_229: db "Unhandeled IRQ 229", 0
+	ISR_message_230: db "Unhandeled IRQ 230", 0
+	ISR_message_231: db "Unhandeled IRQ 231", 0
+	ISR_message_232: db "Unhandeled IRQ 232", 0
+	ISR_message_233: db "Unhandeled IRQ 233", 0
+	ISR_message_234: db "Unhandeled IRQ 234", 0
+	ISR_message_235: db "Unhandeled IRQ 235", 0
+	ISR_message_236: db "Unhandeled IRQ 236", 0
+	ISR_message_237: db "Unhandeled IRQ 237", 0
+	ISR_message_238: db "Unhandeled IRQ 238", 0
+	ISR_message_239: db "Unhandeled IRQ 239", 0
+	ISR_message_240: db "Unhandeled IRQ 240", 0
+	ISR_message_241: db "Unhandeled IRQ 241", 0
+	ISR_message_242: db "Unhandeled IRQ 242", 0
+	ISR_message_243: db "Unhandeled IRQ 243", 0
+	ISR_message_244: db "Unhandeled IRQ 244", 0
+	ISR_message_245: db "Unhandeled IRQ 245", 0
+	ISR_message_246: db "Unhandeled IRQ 246", 0
+	ISR_message_247: db "Unhandeled IRQ 247", 0
+	ISR_message_248: db "Unhandeled IRQ 248", 0
+	ISR_message_249: db "Unhandeled IRQ 249", 0
+	ISR_message_250: db "Unhandeled IRQ 250", 0
+	ISR_message_251: db "Unhandeled IRQ 251", 0
+	ISR_message_252: db "Unhandeled IRQ 252", 0
+	ISR_message_253: db "Unhandeled IRQ 253", 0
+	ISR_message_254: db "Unhandeled IRQ 254", 0
+	ISR_message_255: db "Unhandeled IRQ 255", 0
 
 	ISR_messages: dd ISR_message_0, ISR_message_1, ISR_message_2, ISR_message_3, ISR_message_4, \
 		ISR_message_5, ISR_message_6, ISR_message_7, ISR_message_8, ISR_message_9, ISR_message_10, \

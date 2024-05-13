@@ -4,7 +4,8 @@
 [[gnu::cdecl]] void IRQ_enable(void);
 [[gnu::cdecl]] void IRQ_disable(void);
 
-/* 32bit GDT table implementation for x86_32
+/* --------------------------- GDT ---------------------------
+ * 32bit GDT table implementation for x86_32
  * although we won't be using segmentation, but virtual memory and paging,
  * setting this up is necessary to handle interrupts because the IDT will use the GDT
  * to look up ISRs.
@@ -88,8 +89,7 @@ enum : u8
 };
 
 // written in assembly see GDT.asm
-[[gnu::cdecl]]
-void GDT_load_x86(const struct GDT_descriptor* descriptor, const u16 code_segment_start_in_GDT, const u16 data_segment_startin_GDT);
+[[gnu::cdecl]] void GDT_load_x86(const struct GDT_descriptor* descriptor, const u16 code_segment_start_in_GDT, const u16 data_segment_start_in_GDT);
 void GDT_initialize_x86(void);
 
 
@@ -107,17 +107,17 @@ enum IDT_gate_type : u8
 // an IDT_gate is an entry of the i_d_t
 struct [[gnu::packed]] IDT_gate
 {
-	u16 isr_address_low;
+	u16 ISR_address_low;
 	u16 _GDT_kernel_code_segment; // hardcoded
 	u8 _zero;
 	enum IDT_gate_type type : 4;
 	u8 _zero2 : 1;
 	u8 ring : 2;
 	bool present : 1;
-	u16 isr_address_high;
+	u16 ISR_address_high;
 };
 
 // see IDT.asm
-void IDT_gate_set(const u8 interrupt, const uintptr_t isr_address, const enum IDT_gate_type, const u8 ring);
+void IDT_gate_set(const u8 interrupt, const uintptr_t ISR_address, const enum IDT_gate_type, const u8 ring);
 [[gnu::cdecl]] void IDT_load_x86(void);
 // void IDT_initialize_x86(void);
