@@ -1,6 +1,8 @@
 OBJ_DIR    ?= ./build
 SRC_DIR    = ./src
 
+DEBUGGER   ?= gf2
+
 CC         ?= i686-elf-gcc
 # TODO: fix gcc freestanding include bug
 # If I don't add `-nostdinc` it seems that gcc will gladly include system libraries even though
@@ -55,6 +57,6 @@ run: all
 	qemu-system-i386 -cdrom $(OS_ISO)
 
 debug: all
-	!(pgrep gf2) && setsid -f gf2 &
+	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
 	qemu-system-i386 -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int
 
