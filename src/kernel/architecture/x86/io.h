@@ -1,4 +1,5 @@
 #pragma once
+
 #if __x86_64__
 #	include <architecture/x86/64/io.h>
 #	define x86_out_8(PORT, DATA)	x86_64_out_8(PORT, DATA)

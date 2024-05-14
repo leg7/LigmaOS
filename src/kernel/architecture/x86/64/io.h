@@ -11,3 +11,4 @@ typedef u16 IO_port_32;
 [[gnu::cdecl]] u8   x86_64_in_8(const IO_port_8 port);
 [[gnu::cdecl]] u16  x86_64_in_16(const IO_port_16 port);
 [[gnu::cdecl]] u32  x86_64_in_32(const IO_port_32 port);
+[[gnu::cdecl]] void x86_panic(void);

@@ -36,3 +36,7 @@ x86_64_in_32:
 	in eax, dx
 	ret
 
+global x86_panic
+x86_panic:
+	cli
+	hlt

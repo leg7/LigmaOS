@@ -6,7 +6,6 @@
 #error "Your compiler is 64 bits and not 32 bits, please use a 32 bit compiler"
 #endif
 
-
 #include <stdio.h>
 #include "graphics/vbe_graphics.h"
 #include <multiboot/multiboot1.h>
@@ -37,6 +36,17 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	flags=multiboot_info->flags;
 
 	put_main_window();
+	//
+	// PS2_8042_initialize();
+	// PIC_8259A_initialize();
+	//
+	// IRQ_enable();
+	//
+	// while (true) {
+	// 	for (u32 i = 0; i < 10'000'000; ++i) {
+	//
+	// 	}
+	// }
 }
 
 

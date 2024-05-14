@@ -56,7 +56,7 @@ ISR_NO_ERROR_CODE 31
 	%assign i i+1
 %endrep
 
-extern ISR_handler
+extern ISR_dispatcher
 ISR_common:
     pusha               ; pushes in order: eax, ecx, edx, ebx, esp, ebp, esi, edi
 
@@ -71,7 +71,7 @@ ISR_common:
     mov gs, ax
 
     push esp            ; pass pointer to stack to C, so we can access all the pushed information
-    call ISR_handler
+    call ISR_dispatcher
     add esp, 4
 
     pop eax             ; restore old segment
