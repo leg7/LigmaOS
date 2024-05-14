@@ -1,7 +1,7 @@
-OBJ_DIR    = ./build
+OBJ_DIR    ?= ./build
 SRC_DIR    = ./src
 
-CC         = i686-elf-gcc
+CC         ?= i686-elf-gcc
 # TODO: fix gcc freestanding include bug
 # If I don't add `-nostdinc` it seems that gcc will gladly include system libraries even though
 # -ffreestanding should disable this. The problem is that if I add -nostdinc I loose access to

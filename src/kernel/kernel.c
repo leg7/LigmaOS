@@ -1,9 +1,9 @@
 #if defined(__linux__)
-#error "You are not using a cross compiler dumbass"
+#error "You are not using a cross compiler, please use the provided nix shell or get a cross compiler at https://github.com/travisg/toolchains"
 #endif
 
-#if !defined(__i686__)
-#error "This needs to be compiled with an ix86-elf compiler"
+#if defined(__x86_64__)
+#error "Your compiler is 64 bits and not 32 bits, please use a 32 bit compiler"
 #endif
 
 
