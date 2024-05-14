@@ -58,6 +58,6 @@ run: all
 	qemu-system-i386 -cdrom $(OS_ISO)
 
 debug: all
+	setsid -f $(QEMU) -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
-	$(QEMU) -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int
 
