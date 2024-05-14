@@ -2,6 +2,7 @@ OBJ_DIR    ?= ./build
 SRC_DIR    = ./src
 
 DEBUGGER   ?= gf2
+QEMU	   ?= qemu-system-i386
 
 CC         ?= i686-elf-gcc
 # TODO: fix gcc freestanding include bug
@@ -58,5 +59,5 @@ run: all
 
 debug: all
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
-	qemu-system-i386 -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int
+	$(QEMU) -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int
 
