@@ -37,10 +37,10 @@ multiboot_header:
 		.long 0
 #	endif
 /* TODO: Don't assume resolution */
-	.long 1
-	.long 80
-	.long 25
 	.long 0
+	.long 1024
+	.long 768
+	.long 32
 
 .section .text
 .global _start
