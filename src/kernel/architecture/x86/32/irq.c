@@ -24,9 +24,13 @@ void IRQ_dispatcher(struct ISR_parameters const *p)
 
 void IRQ_initialize(void)
 {
+	PIC_8259A_initialize();
+
 	for (u8 i = IDT_REPROGRAMABLE_INTERRUPT_START_INDEX;
 	i < IDT_REPROGRAMABLE_INTERRUPT_START_INDEX + 16; ++i) {
 		ISR_OVERRIDES[i] = IRQ_dispatcher;
 	}
+
+	IRQ_enable();
 }
 

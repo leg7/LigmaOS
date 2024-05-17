@@ -26,7 +26,7 @@ enum : u8 {
 	ICW_1                            = 1 & (1 << 4),	 		// Require ICW_4 to be sent
 	ICW_2_MASTER                     = IDT_REPROGRAMABLE_INTERRUPT_START_INDEX,		// bits 3-7 will be appended to the IRQ and used to lookup the ISR in the IDT
 	ICW_2_SLAVE                      = IDT_REPROGRAMABLE_INTERRUPT_START_INDEX + 8,
-	ICW_3_MASTER                     = 1 << 3,
+	ICW_3_MASTER                     = 1 << 2,
 	ICW_3_SLAVE                      = 1 << 1,
 	ICW_4                            = 1,
 
@@ -41,9 +41,9 @@ enum : u8 {
 void PIC_8259A_initialize(void)
 {
 	// mask all interrupts while initializing
-	x86_out_8(IO_PORT_MASTER_DATA, UINT8_MAX);
+	x86_out_8(IO_PORT_MASTER_DATA, 0xff);
 	x86_io_wait();
-	x86_out_8(IO_PORT_SLAVE_DATA, UINT8_MAX);
+	x86_out_8(IO_PORT_SLAVE_DATA, 0xff);
 	x86_io_wait();
 
 	x86_out_8(IO_PORT_MASTER_COMMAND, ICW_1);
@@ -65,7 +65,6 @@ void PIC_8259A_initialize(void)
 	x86_io_wait();
 	x86_out_8(IO_PORT_SLAVE_DATA, ICW_4);
 	x86_io_wait();
-	x86_out_8(IO_PORT_SLAVE_DATA, ICW_4);
 
 	// unmask all interrupts
 	x86_out_8(IO_PORT_MASTER_DATA, 0);

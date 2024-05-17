@@ -52,6 +52,8 @@ _start:
 	pushl $0
 	popf
 
+	cli
+
 	pushl %ebx
 	pushl %eax
 	call kernel_main
