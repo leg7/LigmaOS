@@ -1,4 +1,6 @@
 #include "PIC_8259A.h"
+#include <architecture/x86/32/irq.h>
+#include <architecture/x86/32/idt.h>
 #include <architecture/x86/io.h>
 /*
  * PIC = programmable interrupt controller
@@ -10,9 +12,9 @@
 
 enum : u8 {
 	IO_PORT_MASTER_COMMAND = 0x20,
-	IO_PORT_MASTER_DATA = 0x21,
-	IO_PORT_SLAVE_COMMAND = 0xA0,
-	IO_PORT_SLAVE_DATA = 0xA1,
+	IO_PORT_MASTER_DATA    = 0x21,
+	IO_PORT_SLAVE_COMMAND  = 0xA0,
+	IO_PORT_SLAVE_DATA     = 0xA1,
 
 	/*
 	 * ICW = initialization command word
@@ -21,18 +23,18 @@ enum : u8 {
 	 * (there are 2-4 of them) and you must use all 4 on the PIIX3.
 	 * Consult the documentation to know what each bit of the ICWs does.
 	*/
-	ICW_1 = 1 & (1 << 4),	            // Require ICW_4 to be sent
-	ICW_2_MASTER = 32,			// bits 3-7 will be appended to the IRQ and used to lookup the ISR in the IDT
-	ICW_2_SLAVE = 40,
-	ICW_3_MASTER = 1 << 3,
-	ICW_3_SLAVE = 1 << 1,
-	ICW_4 = 1,
+	ICW_1                            = 1 & (1 << 4),	 		// Require ICW_4 to be sent
+	ICW_2_MASTER                     = IDT_REPROGRAMABLE_INTERRUPT_START_INDEX,		// bits 3-7 will be appended to the IRQ and used to lookup the ISR in the IDT
+	ICW_2_SLAVE                      = IDT_REPROGRAMABLE_INTERRUPT_START_INDEX + 8,
+	ICW_3_MASTER                     = 1 << 3,
+	ICW_3_SLAVE                      = 1 << 1,
+	ICW_4                            = 1,
 
 	// OCW 2
-	COMMAND_EOI = 0x20,
+	COMMAND_EOI                      = 0x20,
 
 	// OCW 3
-	COMMAND_READ_IRQ_REGISTER = 0b10,
+	COMMAND_READ_IRQ_REGISTER        = 0b10,
 	COMMAND_READ_IN_SERVICE_REGISTER = 0b11,
 };
 
@@ -124,14 +126,14 @@ s32 PIC_8259A_unmask(u8 irq)
 	return 0;
 }
 
-u16 PIC_8259A_irq_requests(void)
+u16 PIC_8259A_pending(void)
 {
 	x86_out_8(IO_PORT_SLAVE_COMMAND, COMMAND_READ_IRQ_REGISTER);
 	x86_out_8(IO_PORT_MASTER_COMMAND, COMMAND_READ_IRQ_REGISTER);
 	return x86_in_8(IO_PORT_SLAVE_COMMAND) << 8 | x86_in_8(IO_PORT_MASTER_COMMAND);
 }
 
-u16 PIC_8259A_irq_in_service(void)
+u16 PIC_8259A_processing(void)
 {
 	x86_out_8(IO_PORT_SLAVE_COMMAND, COMMAND_READ_IN_SERVICE_REGISTER);
 	x86_out_8(IO_PORT_MASTER_COMMAND, COMMAND_READ_IN_SERVICE_REGISTER);

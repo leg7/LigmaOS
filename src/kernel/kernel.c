@@ -8,9 +8,10 @@
 
 #include <stdio.h>
 #include "graphics/vbe_graphics.h"
+#include <graphics/vga_text_mode.h>
 #include <multiboot/multiboot1.h>
-#include <drivers/PS2_8042.h>
-#include <drivers/PIC_8259A.h>
+#include <architecture/x86/chips/PS2_8042.h>
+#include <architecture/x86/chips/PIC_8259A.h>
 #include <architecture/x86/32/gdt.h>
 #include <architecture/x86/32/idt.h>
 #include <architecture/x86/32/isr.h>
@@ -25,28 +26,26 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	if (multiboot_output_magic != MULTIBOOT_OUTPUT_MAGIC) { // kernel wasn't loaded by a multiboot boot loader
 		return;
 	}
-
-	IRQ_disable();
-
-	GDT_initialize();
-	IDT_initialize();
-
 	fb = (void*)multiboot_info->framebuffer.address;
 	pitch=multiboot_info->framebuffer.pitch;
 	flags=multiboot_info->flags;
 
-	put_main_window();
-	//
+	IRQ_disable();
+
+	terminal_initialize();
+
+	GDT_initialize();
+	IDT_initialize();
+
+	PIC_8259A_initialize();
 	// PS2_8042_initialize();
-	// PIC_8259A_initialize();
+	// IRQ_initialize();
 	//
-	// IRQ_enable();
-	//
-	// while (true) {
-	// 	for (u32 i = 0; i < 10'000'000; ++i) {
-	//
-	// 	}
-	// }
+	IRQ_enable();
+
+	while (true) {
+		// printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
+	}
 }
 
 

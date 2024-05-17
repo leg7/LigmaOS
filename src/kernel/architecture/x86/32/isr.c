@@ -1,11 +1,10 @@
 #include "isr.h"
-#include "idt.h"
 #include <architecture/x86/io.h>
 #include <stdio.h>
 
-char const reserved[] = "Reserved";
+char const RESERVED[] = "Reserved";
 
-char const* ISR_exception_messages[32] = {
+char const* ISR_EXCEPTION_MESSAGES[32] = {
 	"Division by 0",
 	"Debug",
 	"Non-maskable interrupt",
@@ -21,42 +20,35 @@ char const* ISR_exception_messages[32] = {
 	"Stack segment fault",
 	"General protection fault",
 	"Page fault",
-	reserved,
+	RESERVED,
 	"x87 floating point exception",
 	"Alignment check",
 	"Machine check",
 	"SIMD floating point exception",
 	"Virtualization exception",
 	"Control protection exception",
-	reserved,
-	reserved,
-	reserved,
-	reserved,
-	reserved,
-	reserved,
+	RESERVED,
+	RESERVED,
+	RESERVED,
+	RESERVED,
+	RESERVED,
+	RESERVED,
 	"Hypervisor injection exception",
 	"VMM communication exception",
 	"Security exception",
-	reserved,
+	RESERVED,
 };
 
-struct [[gnu::packed]] ISR_dispatcher_parameters
-{
-    // in the reverse order they are pushed:
-    u32 ds;                                            // data segment pushed by us
-    u32 edi, esi, ebp, useless, ebx, edx, ecx, eax;    // pusha
-    u32 interrupt, error;                              // we push interrupt, error is pushed automatically (or our dummy)
-    u32 eip, cs, eflags, esp, ss;                      // pushed automatically by CPU
-};
-
-// void (*ISR_handlers)(struct ISR_dispatcher_parameters)[IDT_LENGTH];
+ISR ISR_OVERRIDES[IDT_LENGTH] = { nullptr };
 
 // TODO: Reduce indirection by setting IDT gates to good handlers right away
-[[gnu::cdecl]] void ISR_dispatcher(struct ISR_dispatcher_parameters *p)
+[[gnu::cdecl]] void ISR_dispatcher(struct ISR_parameters const *p)
 {
-	if (p->interrupt < 32) {
+	if (ISR_OVERRIDES[p->interrupt] != nullptr) {
+		(ISR_OVERRIDES[p->interrupt])(p);
+	} else if (p->interrupt < IDT_REPROGRAMABLE_INTERRUPT_START_INDEX) {
 		// TODO: Use hex format once implemented
-		printf("Unhandeled exception %d: %s\n", p->interrupt, ISR_exception_messages[p->interrupt]);
+		printf("Unhandeled exception %d: %s\n", p->interrupt, ISR_EXCEPTION_MESSAGES[p->interrupt]);
 		printf("  eax=%d  ebx=%d  ecx=%d  edx=%d  esi=%d  edi=%d\n",
 		   p->eax, p->ebx, p->ecx, p->edx, p->esi, p->edi);
 		printf("  esp=%d  ebp=%d  eip=%d  eflags=%d  cs=%d  ds=%d  ss=%d\n",
@@ -66,8 +58,6 @@ struct [[gnu::packed]] ISR_dispatcher_parameters
 		printf("KERNEL PANIC!\n");
 		x86_panic();
 	} else {
-		printf("Unhandeled interrupt %d:\n", p->interrupt);
+		printf("Unhandeled interrupt: %d\n", p->interrupt);
 	}
 }
-
-

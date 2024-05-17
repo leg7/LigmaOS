@@ -2,15 +2,6 @@
 #include "gdt.h"
 #include "isr.h"
 
-enum IDT_gate_type: u8
-{
-	IDT_GATE_TYPE_TASK             = 0b0101,
-	IDT_GATE_TYPE_INTERRUPT_32_BIT = 0b1110,
-	IDT_GATE_TYPE_INTERRUPT_16_BIT = 0b0110,
-	IDT_GATE_TYPE_TRAP_32_BIT      = 0b1111,
-	IDT_GATE_TYPE_TRAP_16_BIT      = 0b0111,
-};
-
 struct [[gnu::aligned(8)]] [[gnu::packed]] IDT_gate
 {
 	u16 ISR_address_low;
@@ -21,11 +12,6 @@ struct [[gnu::aligned(8)]] [[gnu::packed]] IDT_gate
 	u8 ring : 2;
 	bool present : 1;
 	u16 ISR_address_high;
-};
-
-enum : u16
-{
-	IDT_LENGTH = 256,
 };
 
 struct IDT_gate IDT[IDT_LENGTH];
