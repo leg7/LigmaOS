@@ -1,16 +1,28 @@
 #include "stdio.h"
-#include "../kernel/graphics/vga_text_mode.h"
+#include <stdint.h>
+#include <library/settings.h>
+#include <library/includes.h>
 
 // TODO: make this respect the standard
 int puts(const char *string)
 {
-	terminal_put_string(string);
+#	ifdef _SETTINGS_GRAPHICS_VBE
+		put_string_terminal(string);
+#	else
+		terminal_put_string(string);
+#	endif
+
 	return 1;
 }
 
 int putchar(int ch)
 {
-	terminal_put_char(ch);
+#	ifdef _SETTINGS_GRAPHICS_VBE
+		put_char_terminal(ch);
+#	else
+		terminal_put_char(ch);
+#	endif
+
 	return 1;
 }
 
@@ -23,7 +35,7 @@ static inline void unsigned_print(unsigned x)
 		return;
 	}
 
-	int8_t stack_size = 32;
+	constexpr int8_t stack_size = 32;
 	char stack[stack_size]; // should be big enough for any float or 64bit number
 	int8_t stack_len = 0;
 

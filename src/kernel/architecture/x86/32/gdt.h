@@ -1,5 +1,5 @@
 #pragma once
-#include <types.h>
+#include <library/types.h>
 
 /* 32bit GDT table implementation for x86_32
  * although we won't be using segmentation, but virtual memory and paging,

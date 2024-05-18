@@ -1,5 +1,5 @@
 #pragma once
-#include <types.h>
+#include <library/types.h>
 
 enum vga_text_mode_color : u8
 {

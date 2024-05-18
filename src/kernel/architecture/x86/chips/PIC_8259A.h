@@ -1,5 +1,5 @@
 #pragma once
-#include <types.h>
+#include <library/types.h>
 
 void PIC_8259A_initialize(void);
 void PIC_8259A_eoi(u8 const irq);

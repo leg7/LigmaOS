@@ -1,9 +1,8 @@
 #pragma once
-#include <types.h>
+#include <library/types.h>
 #include <string.h>
 #include <multiboot/multiboot1.h>
 #include "font_bitmap.h"
-
 
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768

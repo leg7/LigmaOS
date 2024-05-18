@@ -43,7 +43,7 @@
 
 #ifndef ASM_FILE
 
-#include <types.h>
+#include <library/types.h>
 
 struct [[gnu::packed]] multiboot_header
 {

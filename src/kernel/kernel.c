@@ -7,8 +7,11 @@
 #endif
 
 #include <stdio.h>
-#include "graphics/vbe_graphics.h"
-#include <graphics/vga_text_mode.h>
+
+#include <library/settings.h>
+#include <library/includes.h>
+
+#include <kernel.h>
 #include <multiboot/multiboot1.h>
 #include <architecture/x86/chips/PS2_8042.h>
 #include <architecture/x86/chips/PIC_8259A.h>
@@ -30,7 +33,13 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	pitch=multiboot_info->framebuffer.pitch;
 	flags=multiboot_info->flags;
 
-	terminal_initialize();
+	#ifdef _SETTINGS_GRAPHICS_VBE
+		put_main_window();
+	#else
+		terminal_initialize();
+	#endif
+
+	printf("%s\n", "hello");
 
 	GDT_initialize();
 	IDT_initialize();

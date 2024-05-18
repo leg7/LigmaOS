@@ -2,6 +2,7 @@
 
 #define ASM_FILE 1
 #include <multiboot/multiboot1.h>
+#include <library/settings.h>
 
 .section .bss
 .align 16
@@ -37,10 +38,17 @@ multiboot_header:
 		.long 0
 #	endif
 /* TODO: Don't assume resolution */
-	.long 0
-	.long 1024
-	.long 768
-	.long 0
+#	ifdef _SETTINGS_GRAPHICS_VBE
+		.long 0
+		.long 1024
+		.long 768
+		.long 0
+#	else
+		.long 1
+		.long 80
+		.long 25
+		.long 0
+#	endif
 
 .section .text
 .global _start
