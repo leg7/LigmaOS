@@ -2,6 +2,7 @@
 #include "idt.h"
 #include "isr.h"
 #include <architecture/x86/chips/PIC_8259A.h>
+#include <architecture/x86/chips/PS2_8042.h>
 #include <architecture/x86/io.h>
 #include <stdio.h>
 
@@ -22,12 +23,13 @@ const char* IRQ_MESSAGES[16] = {
 	"ATA channel 2",
 };
 
+// TODO: Get rid of indirection
 void IRQ_dispatcher(struct ISR_parameters const *p)
 {
 	u8 const irq = p->interrupt - IDT_REPROGRAMABLE_INTERRUPT_START_INDEX;
 
 	if (IRQ_OVERRIDES[irq] != nullptr) {
-		(IRQ_OVERRIDES[irq])(p);
+		IRQ_OVERRIDES[irq](p);
 		PIC_8259A_eoi(irq);
 		return;
 	}
@@ -47,6 +49,9 @@ void IRQ_initialize(void)
 	i < IDT_REPROGRAMABLE_INTERRUPT_START_INDEX + 16; ++i) {
 		ISR_OVERRIDES[i] = IRQ_dispatcher;
 	}
+
+	IRQ_OVERRIDES[1] = &PS2_8042_IRQ_1_handler;
+	IRQ_OVERRIDES[12] = &PS2_8042_IRQ_12_handler;
 
 	IRQ_enable();
 }

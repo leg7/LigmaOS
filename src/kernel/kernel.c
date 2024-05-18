@@ -35,9 +35,9 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	GDT_initialize();
 	IDT_initialize();
 
-	PS2_8042_initialize();
 	IRQ_initialize();
 	PIC_8259A_mask(0);
+	PS2_8042_initialize();
 
 	// __asm("int $32");
 	// __asm("int $33");
@@ -55,10 +55,10 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	// __asm("int $45");
 	// __asm("int $46");
 	// __asm("int $47");
-	printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
+	// printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
 
 	for (;;) {
-		printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
+		// printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
 	}
 }
 
