@@ -35,8 +35,9 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	GDT_initialize();
 	IDT_initialize();
 
-	// PS2_8042_initialize();
+	PS2_8042_initialize();
 	IRQ_initialize();
+	PIC_8259A_mask(0);
 
 	// __asm("int $32");
 	// __asm("int $33");
