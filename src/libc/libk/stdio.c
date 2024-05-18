@@ -14,83 +14,98 @@ int putchar(int ch)
 	return 1;
 }
 
-static inline void unsignedPrint(unsigned x)
+
+// TODO: Factor out stack functionality
+static inline void unsigned_print(unsigned x)
 {
 	if (x == 0) {
 		putchar('0');
 		return;
 	}
 
-	constexpr int8_t stackSize = 32;
-	char stack[stackSize]; // should be big enough for any float or 64bit number
-	int8_t stackLen = 0;
+	int8_t stack_size = 32;
+	char stack[stack_size]; // should be big enough for any float or 64bit number
+	int8_t stack_len = 0;
 
 	while (x != 0) {
 		const int modulo = x % 10; // TODO: I hope gcc optimizes this correctly
 		x /= 10;
 
-		stack[stackLen++] = modulo;
+		stack[stack_len++] = modulo;
 	}
 
-	while (--stackLen >= 0) {
-		putchar('0' + stack[stackLen]);
+	while (--stack_len >= 0) {
+		putchar('0' + stack[stack_len]);
 	}
 }
 
-static inline void intPrint(const int x)
+static inline void int_print(int const x)
 {
 	if (x < 0) {
 		putchar('-');
-		unsignedPrint(-x); // TODO: check the assembly of this
+		unsigned_print(-x); // TODO: check the assembly of this
 	} else {
-		unsignedPrint(x);
+		unsigned_print(x);
 	}
 }
 
-enum : uint8_t
+static inline void hex_print_lower(unsigned x)
 {
-	PrintfStateLength_none,
-	PrintfStateLength_hh,
-	PrintfStateLength_h,
-	PrintfStateLength_l,
-	PrintfStateLength_ll,
-	PrintfStateLength_j,
-	PrintfStateLength_z,
-	PrintfStateLength_t,
-	PrintfStateLength_L,
-	PrintfStateSpecifier_none,
-	PrintfStateSpecifier_d,
-	PrintfStateSpecifier_i,
-	PrintfStateSpecifier_u,
-	PrintfStateSpecifier_o,
-	PrintfStateSpecifier_x,
-	PrintfStateSpecifier_X,
-	PrintfStateSpecifier_f,
-	PrintfStateSpecifier_F,
-	PrintfStateSpecifier_e,
-	PrintfStateSpecifier_E,
-	PrintfStateSpecifier_g,
-	PrintfStateSpecifier_G,
-	PrintfStateSpecifier_a,
-	PrintfStateSpecifier_A,
-	PrintfStateSpecifier_c,
-	PrintfStateSpecifier_s,
-	PrintfStateSpecifier_p,
-	PrintfStateSpecifier_n,
-	PrintfStateCount,
-} PrintfState;
+	static constexpr char decimal_to_hex_lower[16] = {
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'a', 'b', 'c', 'd', 'e', 'f',
+	};
 
-// enum PrintfState PrintfStateLength_Transition(const enum PrinfState s)
+	if (x == 0) {
+		putchar('0');
+		return;
+	}
 
-// constexpr enum PrintfState PrintfStateTransitionTable[PrintfStateCount] = {
-//
-// };
+	constexpr int8_t stack_size = 32;
+	char stack[stack_size];
+	int8_t stack_len = 0;
+
+	while (x != 0) {
+		stack[stack_len++] = decimal_to_hex_lower[x % 16];
+		x /= 16;
+	}
+
+	while (--stack_len >= 0) {
+		putchar(stack[stack_len]);
+	}
+}
+
+static inline void hex_print_upper(unsigned x)
+{
+	static constexpr char decimal_to_hex_upper[16] = {
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'A', 'B', 'C', 'D', 'E', 'F',
+	};
+
+	if (x == 0) {
+		putchar('0');
+		return;
+	}
+
+	constexpr int8_t stack_size = 32;
+	char stack[stack_size];
+	int8_t stack_len = 0;
+
+	while (x != 0) {
+		stack[stack_len++] = decimal_to_hex_upper[x % 16];
+		x /= 16;
+	}
+
+	while (--stack_len >= 0) {
+		putchar(stack[stack_len]);
+	}
+}
 
 // Assumes 32bit SysV abi
 // TODO: buffer it and flush on \n
 int printf(const char* restrict format, ...)
 {
-	int32_t* nextArg = (int32_t*)(&format);
+	int32_t* next_arg = (int32_t*)(&format);
 
 	while (*format != '\0') {
 		if (*format == '%') switch (*(++format)) {
@@ -101,19 +116,21 @@ int printf(const char* restrict format, ...)
 
 			case 'd':
 			case 'i':
-				intPrint(*(++nextArg));
+				int_print(*(++next_arg));
 			break;
 
 			case 'u':
-				unsignedPrint(*(++nextArg));
+				unsigned_print(*(++next_arg));
 			break;
 
 			case 'o': // TODO
 			break;
 
-			case 'x': // TODO
+			case 'x':
+				hex_print_lower(*(++next_arg));
 			break;
-			case 'X': // TODO
+			case 'X':
+				hex_print_upper(*(++next_arg));
 			break;
 
 			case 'f': // TODO
@@ -137,11 +154,11 @@ int printf(const char* restrict format, ...)
 			break;
 
 			case 'c':
-				putchar(*(++nextArg));
+				putchar(*(++next_arg));
 			break;
 
 			case 's':
-				puts((char*)(*(++nextArg)));
+				puts((char*)(*(++next_arg)));
 			break;
 
 			case 'p': // TODO
