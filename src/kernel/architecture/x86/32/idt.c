@@ -42,7 +42,7 @@ void IDT_set_gate(u8 const interrupt, u32 const ISR_address, enum IDT_gate_type 
 	IDT[interrupt]._zero_2 = 0;
 }
 
-[[gnu::cdecl]] void IDT_load(struct IDT_descriptor d);
+[[gnu::cdecl]] void IDT_load(struct IDT_descriptor d); // assembly function
 
 void IDT_initialize(void)
 {

@@ -24,7 +24,7 @@ const char* IRQ_MESSAGES[16] = {
 };
 
 // TODO: Get rid of indirection
-void IRQ_dispatcher(struct ISR_parameters const *p)
+static void dispatcher(struct ISR_parameters const *p)
 {
 	u8 const irq = p->interrupt - IDT_REPROGRAMABLE_INTERRUPT_START_INDEX;
 
@@ -47,7 +47,7 @@ void IRQ_initialize(void)
 
 	for (u8 i = IDT_REPROGRAMABLE_INTERRUPT_START_INDEX;
 	i < IDT_REPROGRAMABLE_INTERRUPT_START_INDEX + 16; ++i) {
-		ISR_OVERRIDES[i] = IRQ_dispatcher;
+		ISR_OVERRIDES[i] = dispatcher;
 	}
 
 	IRQ_OVERRIDES[1] = &PS2_8042_IRQ_1_handler;

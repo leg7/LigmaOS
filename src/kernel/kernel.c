@@ -39,24 +39,6 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	PIC_8259A_mask(0);
 	PS2_8042_initialize();
 
-	// __asm("int $32");
-	// __asm("int $33");
-	// __asm("int $34");
-	// __asm("int $35");
-	// __asm("int $36");
-	// __asm("int $37");
-	// __asm("int $38");
-	// __asm("int $39");
-	// __asm("int $40");
-	// __asm("int $41");
-	// __asm("int $42");
-	// __asm("int $43");
-	// __asm("int $44");
-	// __asm("int $45");
-	// __asm("int $46");
-	// __asm("int $47");
-	// printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
-
 	for (;;) {
 		// printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
 	}
