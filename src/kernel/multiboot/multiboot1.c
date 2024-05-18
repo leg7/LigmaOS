@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include "multiboot1.h"
 
-// TODO: Use correct printf formats once they are implemented
 void multiboot_info_print(struct multiboot_info *multiboot_info)
 {
 	puts("Multiboot info:\n");
-	printf("\tflags = %u\n\n", multiboot_info->flags);
+	printf("\tflags = %x\n\n", multiboot_info->flags);
 	if (multiboot_info->flags & MULTIBOOT_INFO_FLAG_MEMORY) {
 		printf("\tmemory_lower = %uKB\n"
 	   		 "\tmemory_upper = %uKB\n\n",
@@ -61,7 +60,7 @@ void multiboot_info_print(struct multiboot_info *multiboot_info)
 	}
 	if (multiboot_info->flags & MULTIBOOT_INFO_FLAG_FRAMEBUFFER) {
 		printf("\tframebuffer:\n"
-			 "\t\taddress = %u\n"
+			 "\t\taddress = %x\n"
 			 "\t\tpitch = %u\n"
 			 "\t\twidth = %u pixels\n"
 			 "\t\theight = %u pixels\n"

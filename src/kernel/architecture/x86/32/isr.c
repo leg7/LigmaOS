@@ -47,15 +47,15 @@ ISR ISR_OVERRIDES[IDT_LENGTH] = { nullptr };
 	if (ISR_OVERRIDES[p->interrupt] != nullptr) {
 		(ISR_OVERRIDES[p->interrupt])(p);
 	} else if (p->interrupt < IDT_REPROGRAMABLE_INTERRUPT_START_INDEX) {
-		// TODO: Use hex format once implemented
-		printf("Unhandeled exception %d: %s\n", p->interrupt, ISR_EXCEPTION_MESSAGES[p->interrupt]);
-		printf("  eax=%d  ebx=%d  ecx=%d  edx=%d  esi=%d  edi=%d\n",
-		   p->eax, p->ebx, p->ecx, p->edx, p->esi, p->edi);
-		printf("  esp=%d  ebp=%d  eip=%d  eflags=%d  cs=%d  ds=%d  ss=%d\n",
-		   p->esp, p->ebp, p->eip, p->eflags, p->cs, p->ds, p->ss);
-		printf("  interrupt=%d  errorcode=%d\n",
+		printf("Unhandeled exception %d: %s\n"
+			 "\teax = %x, ebx = %x, ecx = %x, edx = %x, esi = %x, edi = %x\n"
+			 "\tesp = %x, ebp = %x, eip = %x, eflags = %x, cs = %x, ds = %x, ss = %x\n"
+			 "\tinterrupt = %d, errorcode = %x\n"
+	   		 "\tKERNEL PANIC!\n",
+		   p->interrupt, ISR_EXCEPTION_MESSAGES[p->interrupt],
+		   p->eax, p->ebx, p->ecx, p->edx, p->esi, p->edi,
+		   p->esp, p->ebp, p->eip, p->eflags, p->cs, p->ds, p->ss,
 		   p->interrupt, p->error);
-		printf("KERNEL PANIC!\n");
 		x86_panic();
 	} else {
 		printf("Unhandeled interrupt: %d\n", p->interrupt);

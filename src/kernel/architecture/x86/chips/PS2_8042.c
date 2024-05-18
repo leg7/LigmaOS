@@ -174,11 +174,11 @@ void PS2_8042_initialize(void)
 void PS2_8042_IRQ_1_handler(struct ISR_parameters const *p)
 {
 	u8 const data = data_read();
-	printf("keyboard: %d\n", data);
+	printf("keyboard: %X\n", data);
 }
 
 void PS2_8042_IRQ_12_handler(struct ISR_parameters const *p)
 {
 	u8 const data = data_read();
-	printf("mouse: %d\n", data);
+	printf("mouse: %X\n", data);
 }
