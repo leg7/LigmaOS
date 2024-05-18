@@ -11,7 +11,6 @@
 #include <library/settings.h>
 #include <library/includes.h>
 
-#include <kernel.h>
 #include <multiboot/multiboot1.h>
 #include <architecture/x86/chips/PS2_8042.h>
 #include <architecture/x86/chips/PIC_8259A.h>
@@ -39,7 +38,7 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 		terminal_initialize();
 	#endif
 
-	printf("%s\n", "hello");
+	// printf("%s\n", "hello");
 
 	GDT_initialize();
 	IDT_initialize();
