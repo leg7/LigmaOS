@@ -31,7 +31,7 @@ DEPEND     += $(patsubst %.o, %.d, $(OBJ_GAS))
 OS         = $(SRC_DIR)/isodir/boot/os.bin
 OS_ISO     = $(OBJ_DIR)/os.iso
 
-.PHONY: clean run debug all
+.PHONY: clean
 
 all: $(OS_ISO)
 
@@ -39,7 +39,6 @@ $(OS_ISO): $(OBJ_C) $(OBJ_NASM32) $(OBJ_GAS) Makefile
 	@printf "\n"
 	$(CC) -T linker.ld $(OBJ_C) $(OBJ_NASM32) $(OBJ_GAS) -o $(OS) $(LDFLAGS)
 	@printf "\n"
-	@echo $(DEPEND)
 	grub-file --is-x86-multiboot $(OS)
 	grub-mkrescue -o $(OS_ISO) $(SRC_DIR)/isodir
 
@@ -65,4 +64,3 @@ run: all
 debug: all
 	setsid -f $(QEMU) -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
-
