@@ -34,19 +34,19 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	flags=multiboot_info->flags;
 
 	#ifdef _SETTINGS_GRAPHICS_VBE
-		put_main_window();
+		test_interface();
 	#else
 		terminal_initialize();
 	#endif
 
-	printf("%s\n", "hello");
+	//printf("%s\n", "hello");
 
 	GDT_initialize();
 	IDT_initialize();
 
-	IRQ_initialize();
+	/*IRQ_initialize();
 	PIC_8259A_mask(0);
-	PS2_8042_initialize();
+	PS2_8042_initialize();*/
 
 	for (;;) {
 		// printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
