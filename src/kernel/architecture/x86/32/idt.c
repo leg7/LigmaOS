@@ -14,7 +14,7 @@ struct [[gnu::aligned(8)]] [[gnu::packed]] IDT_gate
 	u16 ISR_address_high;
 };
 
-struct IDT_gate IDT[IDT_LENGTH];
+static struct IDT_gate IDT[IDT_LENGTH];
 
 struct [[gnu::packed]] IDT_descriptor
 {
@@ -22,7 +22,7 @@ struct [[gnu::packed]] IDT_descriptor
 	struct IDT_gate *IDT;
 };
 
-struct IDT_descriptor IDT_descriptor = {
+static struct IDT_descriptor IDT_descriptor = {
 	.size = sizeof(IDT) - 1,
 	.IDT = IDT,
 };

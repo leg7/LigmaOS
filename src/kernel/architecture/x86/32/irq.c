@@ -3,12 +3,13 @@
 #include "isr.h"
 #include <architecture/x86/chips/PIC_8259A.h>
 #include <architecture/x86/chips/PS2_8042.h>
+#include <drivers/input/PS2_keyboard.h>
 #include <architecture/x86/io.h>
 #include <stdio.h>
 
-ISR IRQ_OVERRIDES[16] = { nullptr };
+static ISR IRQ_OVERRIDES[16] = { nullptr };
 
-const char* IRQ_MESSAGES[16] = {
+static const char* IRQ_MESSAGES[16] = {
 	"System timer",
 	"Keyboard controller",
 	"Serial port COM 2",
@@ -39,6 +40,8 @@ static void dispatcher(struct ISR_parameters const *p)
 	u16 const processing = PIC_8259A_processing();
 	printf("Unhandeled IRQ %d: %s\n\tpending irqs: %d\n\tprocessing irqs: %d\n",
 	  irq, IRQ_MESSAGES[irq], pending, processing);
+
+	PIC_8259A_eoi(irq);
 }
 
 void IRQ_initialize(void)
@@ -50,7 +53,7 @@ void IRQ_initialize(void)
 		ISR_OVERRIDES[i] = dispatcher;
 	}
 
-	IRQ_OVERRIDES[1] = &PS2_8042_IRQ_1_handler;
+	IRQ_OVERRIDES[1] = &PS2_keyboard_IRQ_1_handler;
 	IRQ_OVERRIDES[12] = &PS2_8042_IRQ_12_handler;
 
 	IRQ_enable();

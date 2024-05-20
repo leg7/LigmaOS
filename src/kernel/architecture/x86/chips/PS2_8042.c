@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <architecture/x86/io.h>
 #include "PS2_8042.h"
+#include <drivers/input/PS2_keyboard.h>
 
 union {
 	struct {
@@ -23,7 +24,6 @@ enum : IO_port_8
 	IO_PORT_COMMAND = 0x64,
 	IO_PORT_STATUS = IO_PORT_COMMAND,
 };
-
 
 // masks to apply to the status byte
 // kernel pov
@@ -82,14 +82,19 @@ static inline void command_send_port_2(enum _8042_command const command)
 	x86_out_8(IO_PORT_DATA, command);
 }
 
-static inline u8 data_read()
+static inline void data_write(u8 const data)
+{
+	x86_out_8(IO_PORT_DATA, data);
+}
+
+u8 PS2_8042_data_read(void)
 {
 	return x86_in_8(IO_PORT_DATA);
 }
 
-static inline void data_write(u8 const data)
+static inline u8 data_read(void)
 {
-	x86_out_8(IO_PORT_DATA, data);
+	return x86_in_8(IO_PORT_DATA);
 }
 
 // TODO: Disable usb legacy support
@@ -169,12 +174,6 @@ void PS2_8042_initialize(void)
 
 	command_send(COMMAND_PORT_1_ENABLE);
 	command_send(COMMAND_PORT_2_ENABLE);
-}
-
-void PS2_8042_IRQ_1_handler(struct ISR_parameters const *p)
-{
-	u8 const data = data_read();
-	printf("keyboard: %X\n", data);
 }
 
 void PS2_8042_IRQ_12_handler(struct ISR_parameters const *p)

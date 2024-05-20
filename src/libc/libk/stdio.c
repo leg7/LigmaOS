@@ -9,7 +9,7 @@ int puts(const char *string)
 #	ifdef _SETTINGS_GRAPHICS_VBE
 		put_string_terminal(string);
 #	else
-		terminal_put_string(string);
+		VGA_text_mode_put_string(string);
 #	endif
 
 	return 1;
@@ -20,7 +20,7 @@ int putchar(int ch)
 #	ifdef _SETTINGS_GRAPHICS_VBE
 		put_char_terminal(ch);
 #	else
-		terminal_put_char(ch);
+		VGA_text_mode_put_char(ch);
 #	endif
 
 	return 1;
