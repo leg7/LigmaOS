@@ -77,7 +77,7 @@ enum : u8
 	// bit 0 is reserved by the cpu
 };
 
-constexpr struct GDT_entry GDT[3] = {
+static constexpr struct GDT_entry GDT[3] = {
 	GDT_entry(0, 0, 0, 0),
 
 	// code segment spanning all of the addressable memory
@@ -97,7 +97,7 @@ constexpr struct GDT_entry GDT[3] = {
 	),
 };
 
-struct GDT_descriptor GDT_descriptor = {
+static struct GDT_descriptor GDT_descriptor = {
 	.size = sizeof(GDT) - 1,
 	.GDT = GDT,
 };

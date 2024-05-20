@@ -11,7 +11,6 @@
 #include <library/settings.h>
 #include <library/includes.h>
 
-#include <kernel.h>
 #include <multiboot/multiboot1.h>
 #include <architecture/x86/chips/PS2_8042.h>
 #include <architecture/x86/chips/PIC_8259A.h>
@@ -19,6 +18,7 @@
 #include <architecture/x86/32/idt.h>
 #include <architecture/x86/32/isr.h>
 #include <architecture/x86/32/irq.h>
+#include <drivers/input/PS2_keyboard.h>
 
 void* fb;
 u32 pitch;
@@ -36,20 +36,20 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	#ifdef _SETTINGS_GRAPHICS_VBE
 		test_interface();
 	#else
-		terminal_initialize();
+		VGA_text_mode_initialize();
 	#endif
 
-	//printf("%s\n", "hello");
+
 
 	GDT_initialize();
 	IDT_initialize();
 
-	/*IRQ_initialize();
+	IRQ_initialize();
 	PIC_8259A_mask(0);
-	PS2_8042_initialize();*/
+	PS2_8042_initialize();
 
 	for (;;) {
-		// printf("%d %d\n", PIC_8259A_pending(), PIC_8259A_processing());
+		// PS2_keyboard_
 	}
 }
 

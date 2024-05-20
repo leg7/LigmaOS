@@ -2,9 +2,9 @@
 #include <architecture/x86/io.h>
 #include <stdio.h>
 
-char const RESERVED[] = "Reserved";
+static constexpr char const RESERVED[] = "Reserved";
 
-char const* ISR_EXCEPTION_MESSAGES[32] = {
+static char const* ISR_EXCEPTION_MESSAGES[32] = {
 	"Division by 0",
 	"Debug",
 	"Non-maskable interrupt",

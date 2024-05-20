@@ -1,35 +1,34 @@
 #pragma once
 #include <library/types.h>
 
-enum vga_text_mode_color : u8
+enum VGA_text_mode_color : u8
 {
-	vga_text_mode_color_black,
-	vga_text_mode_color_blue,
-	vga_text_mode_color_green,
-	vga_text_mode_color_cyan,
-	vga_text_mode_color_red,
-	vga_text_mode_color_magenta,
-	vga_text_mode_color_brown,
-	vga_text_mode_color_light_grey,
-	vga_text_mode_color_dark_grey,
-	vga_text_mode_color_light_blue,
-	vga_text_mode_color_light_green,
-	vga_text_mode_color_light_cyan,
-	vga_text_mode_color_light_red,
-	vga_text_mode_color_light_magenta,
-	vga_text_mode_color_light_brown,
-	vga_text_mode_color_white,
+	VGA_text_mode_color_black,
+	VGA_text_mode_color_blue,
+	VGA_text_mode_color_green,
+	VGA_text_mode_color_cyan,
+	VGA_text_mode_color_red,
+	VGA_text_mode_color_magenta,
+	VGA_text_mode_color_brown,
+	VGA_text_mode_color_light_grey,
+	VGA_text_mode_color_dark_grey,
+	VGA_text_mode_color_light_blue,
+	VGA_text_mode_color_light_green,
+	VGA_text_mode_color_light_cyan,
+	VGA_text_mode_color_light_red,
+	VGA_text_mode_color_light_magenta,
+	VGA_text_mode_color_light_brown,
+	VGA_text_mode_color_white,
 };
 
-u8 vga_text_mode_attribute
-(const enum vga_text_mode_color foreground, const enum vga_text_mode_color background);
-u16 vga_text_mode_entry(const unsigned char uc, const u8 color);
+u8 VGA_text_mode_attribute (const enum VGA_text_mode_color foreground, const enum VGA_text_mode_color background);
+u16 VGA_text_mode_entry(const unsigned char uc, const u8 color);
 
-void terminal_initialize(void);
+void VGA_text_mode_initialize(void);
 
-void terminal_put_entry(const char c, const u8 color, const u8 column, const u8 row);
-void terminal_put_prompt(void);
-void terminal_put_char(const char c);
-void terminal_put_string(const char* string);
+void VGA_text_mode_put_entry(const char c, const u8 color, const u8 column, const u8 row);
+void VGA_text_mode_put_prompt(void);
+void VGA_text_mode_put_char(const char c);
+void VGA_text_mode_put_string(const char* string);
 
-void terminal_scroll_down(void);
+void VGA_text_mode_scroll_down(void);
