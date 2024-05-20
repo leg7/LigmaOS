@@ -2,7 +2,7 @@ OBJ_DIR    ?= ./build
 SRC_DIR    = ./src
 
 DEBUGGER   ?= gf2
-QEMU	     ?= qemu-system-i386
+QEMU       ?= qemu-system-i386
 
 CC         ?= i686-elf-gcc
 # TODO: fix gcc freestanding include bug
@@ -25,7 +25,6 @@ OBJ_GAS    := $(patsubst $(SRC_DIR)%.S, $(OBJ_DIR)%.S.o, $(SRC_GAS))
 
 DEPEND     := $(patsubst %.o, %.d, $(OBJ_C))
 DEPEND     += $(patsubst %.o, %.d, $(OBJ_GAS))
--include $(DEPEND)
 
 # Name is hardcoded in /isodir/grub/grub.cfg
 OS         = $(SRC_DIR)/isodir/boot/os.bin
@@ -64,3 +63,5 @@ run: all
 debug: all
 	setsid -f $(QEMU) -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
+
+-include $(DEPEND)
