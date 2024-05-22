@@ -156,3 +156,5 @@ constexpr enum key const keycode_to_key[KEYMAP_ROWS][KEYMAP_COLUMNS] = {
 };
 
 void PS2_keyboard_IRQ_1_handler(struct ISR_parameters const *p);
+
+// TODO: Make an interface so people can get keyboard input

@@ -19,6 +19,7 @@
 #include <architecture/x86/32/isr.h>
 #include <architecture/x86/32/irq.h>
 #include <drivers/input/PS2_keyboard.h>
+#include <drivers/time/RTC.h>
 
 void* fb;
 u32 pitch;
@@ -47,6 +48,7 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	IRQ_initialize();
 	PIC_8259A_mask(0);
 	PS2_8042_initialize();
+	RTC_initialize();
 
 	for (;;) {
 		// PS2_keyboard_

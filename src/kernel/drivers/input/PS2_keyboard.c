@@ -5,6 +5,7 @@
 
 // TODO: check chat scan code set the keyboard is using
 // TODO: support scan code sets 1 and 3
+// TODO: support sending commands to the controller
 
 // scancodes corresponding to qwerty keys
 // keys commented out are special keys that are encoded over multiple bytes
@@ -483,8 +484,8 @@ void PS2_keyboard_IRQ_1_handler(struct ISR_parameters const *p)
 	}
 	state = state_transition_table[state][token];
 
-	printf("%s\n", state_string[state]);
-	printf("%X\t %s\n", scancode, token_string[token]);
+	// printf("%s\n", state_string[state]);
+	// printf("%X\t %s\n", scancode, token_string[token]);
 
 	if (state == STATE_KEY_PRESSED || state == STATE_KEY_RELEASED) {
 		union keycode k;
@@ -500,8 +501,7 @@ void PS2_keyboard_IRQ_1_handler(struct ISR_parameters const *p)
 
 		if (state == STATE_KEY_PRESSED) {
 			KEYCODE_IS_PRESSED[k.code] = true;
-			putchar(keycode_to_key[k.row][k.column]);
-			putchar('\n');
+			// putchar(keycode_to_key[k.row][k.column]);
 		} else {
 			KEYCODE_IS_PRESSED[k.code] = false;
 			KEYCODE_IS_PRESSED[PAUSE_KEYCODE.code] = false;

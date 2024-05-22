@@ -4,6 +4,7 @@
 #include <architecture/x86/chips/PIC_8259A.h>
 #include <architecture/x86/chips/PS2_8042.h>
 #include <drivers/input/PS2_keyboard.h>
+#include <drivers/time/RTC.h>
 #include <architecture/x86/io.h>
 #include <stdio.h>
 
@@ -54,6 +55,7 @@ void IRQ_initialize(void)
 	}
 
 	IRQ_OVERRIDES[1] = &PS2_keyboard_IRQ_1_handler;
+	IRQ_OVERRIDES[8] = &RTC_IRQ_8_handler;
 	IRQ_OVERRIDES[12] = &PS2_8042_IRQ_12_handler;
 
 	IRQ_enable();
