@@ -3,6 +3,7 @@ SRC_DIR    = ./src
 
 DEBUGGER   ?= gf2
 QEMU       ?= qemu-system-i386
+QEMU_FLAGS ?= -cdrom $(OS_ISO) -audiodev pa,id=speaker -machine pcspk-audiodev=speaker
 
 CC         ?= i686-elf-gcc
 # TODO: fix gcc freestanding include bug
@@ -58,10 +59,10 @@ clean:
 	rm $(OS)
 
 run: all
-	$(QEMU) -cdrom $(OS_ISO)
+	$(QEMU) $(QEMU_FLAGS)
 
 debug: all
-	setsid -f $(QEMU) -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
+	setsid -f $(QEMU) $(QEMU_FLAG) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
 
 -include $(DEPEND)

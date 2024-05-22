@@ -14,6 +14,7 @@
 #include <multiboot/multiboot1.h>
 #include <architecture/x86/chips/PS2_8042.h>
 #include <architecture/x86/chips/PIC_8259A.h>
+#include <architecture/x86/chips/PIT_8254.h>
 #include <architecture/x86/32/gdt.h>
 #include <architecture/x86/32/idt.h>
 #include <architecture/x86/32/isr.h>
@@ -46,14 +47,14 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	IDT_initialize();
 
 	IRQ_initialize();
-	PIC_8259A_mask(0);
 	PS2_8042_initialize();
+	PIC_8259A_mask(0);
+	PIT_8254_initialize();
+	PIT_8254_frequency_play(500);
+	// PIT_8254_frequency_stop();
 	RTC_initialize();
 
 	for (;;) {
 		// PS2_keyboard_
 	}
 }
-
-
-

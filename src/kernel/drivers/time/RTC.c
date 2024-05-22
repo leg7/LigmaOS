@@ -14,7 +14,7 @@ enum : u8
 	SELECT_NMI_DISABLE = (1 << 7),
 };
 
-enum select // : u8
+enum select : u8
 {
 	SELECT_SECONDS       = 0x00, // 0–59
 	SELECT_MINUTES       = 0x02, // 0–59
@@ -40,9 +40,9 @@ enum select // : u8
 union status_a
 {
 	struct {
-		// divider, default (0b0110) (1.024kHz, square wave, 976.562u periodic int)
+		// frequency divider, default (0b0110) (1.024kHz, square wave, 976.562u periodic int)
 		// The fastest rate you can select without problems is 3
-		// to choose a new rate use this equation: frequency =  32768 >> (rate-1);
+		// to choose a new rate use this equation: frequency = 32768 >> (rate-1);
 		u8 rate_selection : 4;
 		u8 _time_base : 3; // don't change this because only the default value (0b010)(32.768kHz) keeps proper time
 		bool update_in_progress : 1;
@@ -131,6 +131,9 @@ void RTC_IRQ_8_handler(struct ISR_parameters const *p)
 	RTC_DATE.month    = get_register(SELECT_MONTH);
 	// TODO: Check if the RTC century register exists with ACPI
 	RTC_DATE.year     = get_register(SELECT_YEAR) + get_register(SELECT_CENTURY) * 100;
+
+	// printf("%u %u/%u/%u\t", RTC_DATE.weekday, RTC_DATE.day, RTC_DATE.month, RTC_DATE.year);
+	// printf("%u:%u:%u\n", RTC_TIME.hours_24, RTC_TIME.minutes, RTC_TIME.seconds);
 
 	acknowledge_interrupt();
 }
