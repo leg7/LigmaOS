@@ -35,12 +35,12 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	flags=multiboot_info->flags;
 
 	#ifdef _SETTINGS_GRAPHICS_VBE
-		put_main_window();
+		test_interface();
 	#else
 		VGA_text_mode_initialize();
 	#endif
 
-	// printf("%s\n", "hello");
+
 
 	GDT_initialize();
 	IDT_initialize();
