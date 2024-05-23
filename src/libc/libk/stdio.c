@@ -7,7 +7,7 @@
 int puts(const char *string)
 {
 #	ifdef _SETTINGS_GRAPHICS_VBE
-		put_string_terminal(string);
+		VBE_put_string_terminal(string);
 #	else
 		VGA_text_mode_put_string(string);
 #	endif
@@ -18,7 +18,7 @@ int puts(const char *string)
 int putchar(int ch)
 {
 #	ifdef _SETTINGS_GRAPHICS_VBE
-		put_char_terminal(ch);
+		VBE_put_char_terminal(ch);
 #	else
 		VGA_text_mode_put_char(ch);
 #	endif

@@ -1,3 +1,3 @@
 #pragma once
 
-// #define _SETTINGS_GRAPHICS_VBE
+ #define _SETTINGS_GRAPHICS_VBE

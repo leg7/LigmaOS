@@ -34,7 +34,7 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	flags=multiboot_info->flags;
 
 	#ifdef _SETTINGS_GRAPHICS_VBE
-		test_interface();
+		VBE_test_interface();
 	#else
 		VGA_text_mode_initialize();
 	#endif
@@ -44,9 +44,9 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	GDT_initialize();
 	IDT_initialize();
 
-	IRQ_initialize();
+	/*IRQ_initialize();
 	PIC_8259A_mask(0);
-	PS2_8042_initialize();
+	PS2_8042_initialize();*/
 
 	for (;;) {
 		// PS2_keyboard_
