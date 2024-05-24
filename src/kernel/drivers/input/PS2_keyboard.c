@@ -415,19 +415,25 @@ const char* token_string[] =
 	"TOKEN_NMEMB",
 };
 
-// [state][token] = new state to transition to
+/* Please update PS2_keyboard_state_machine_diagram.md if you are going to change
+the state machine.
+To generate the diagram run `make doc`
+
+[state][token] = new state to transition to */
 constexpr enum state state_transition_table[STATE_NMEMB][TOKEN_NMEMB] = {
 			   //              RELEASED,                        EXTENDED,           SCANCODE,   SCANCODE_EXTENDED,                    PAUSE,                 PRINT_SCREEN_1,  PRINT_SCREEN_2,
 /* TRAP            */ { 0 },
 /* INITIAL         */ {           STATE_RELEASED,                  STATE_EXTENDED,  STATE_KEY_PRESSED,                    0,   STATE_PAUSE_PRESSED,                                0,                  0 },
 /* REL             */ {                        0,                               0, STATE_KEY_RELEASED,                    0,                     0,                                0,                  0 },
-/* PAUSE_PRSD      */ {                        0,                               0, STATE_KEY_RELEASED,                    0,                     0,                                0,                  0 },
 
-// maybe set it to initial_state?
+				// These return to initial in with control flow
 /* K_PRSD          */ {                        0,                               0,                  0,                    0,                     0,                                0,                  0 },
 /* K_REL           */ {                        0,                               0,                  0,                    0,                     0,                                0,                  0 }, // same
+				// This goes to STATE_KEY_PRESSED with control flow
+/* PAUSE_PRSD      */ {                        0,                               0,                  0,                    0,                     0,                                0,                  0 },
 
 /* EXT             */ {  STATE_EXTENDED_RELEASED,                               0,                  0,    STATE_KEY_PRESSED,                     0,           STATE_EXTENDED_PRINT_1,                  0 },
+
 /* EXT_PRINT_1     */ {                        0,          STATE_EXTENDED_PRINT_2,                  0,                    0,                     0,                                0,                  0 },
 /* EXT_PRINT_2     */ {                        0,                               0,                  0,                    0,                     0,                                0,  STATE_KEY_PRESSED },
 
@@ -446,6 +452,7 @@ void PS2_keyboard_IRQ_1_handler(struct ISR_parameters const *p)
 
 	#include <architecture/x86/io.h>
 	if (state == STATE_TRAP) {
+		// TODO: Handle gracefully
 		printf("PS2 DRIVER BUG!\nKERNEL PANIC");
 		x86_panic();
 	}

@@ -19,6 +19,7 @@
         gnumake
         qemu
         nasm
+        pandoc texliveSmall mermaid-filter librsvg
         # debug
         halloy
         gdb

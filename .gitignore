@@ -1,4 +1,6 @@
-.proprietaryDocs
+.doc-proprietary
 build
 example
 *.bin
+*mermaid-filter.err
+*.pdf

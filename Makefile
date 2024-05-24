@@ -65,4 +65,25 @@ debug: all
 	setsid -f $(QEMU) $(QEMU_FLAG) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
 
+
 -include $(DEPEND)
+
+DOC_DIR    = ./doc
+
+SRC_MD	   := $(shell find $(SRC_DIR) -type f -name '*.md')
+OBJ_MD	   := $(patsubst $(SRC_DIR)%.md, $(DOC_DIR)%.pdf, $(SRC_MD))
+
+SRC_MD_2   := $(shell find $(DOC_DIR) -maxdepth 1 -type f -name '*.md')
+OBJ_MD     += $(patsubst $(DOC_DIR)%.md, $(DOC_DIR)%.pdf, $(SRC_MD_2))
+
+$(DOC_DIR)/%.pdf: $(SRC_DIR)/%.md
+	@mkdir -p $(shell dirname $@)
+	pandoc -F mermaid-filter $< -o $@
+
+$(DOC_DIR)/%.pdf: $(DOC_DIR)/%.md
+	@mkdir -p $(shell dirname $@)
+	pandoc -F mermaid-filter $< -o $@
+
+doc: $(OBJ_MD) Makefile
+	# Workaround to delete garbage made from generating documents
+	find -name 'mermaid-filter.err' -exec rm {} \;
