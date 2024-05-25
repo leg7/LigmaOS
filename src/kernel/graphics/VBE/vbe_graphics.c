@@ -2,7 +2,7 @@
 
 void VBE_plot_pixel_32bpp(u16 x,u16 y,u32 color){
     if ((x<=SCREEN_WIDTH) & (y<=SCREEN_HEIGHT)){
-        u32 *pixel = (u8*)fb + pitch * y + (bpp/8) * x;
+        u32 *pixel = (u32*)(fb + pitch * y + (bpp/8) * x);
         *pixel = color;
     }
 }

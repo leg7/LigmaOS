@@ -33,8 +33,7 @@ u16 input_start_y=TEXT_START_Y;
 
 enum VBE_window current_window=MENU_WINDOW;
 
-
-static inline void VBE_put_header_text(char *str,u32 color){
+static inline void VBE_put_header_text(char const *str, u32 color){
     u16 header_cursor_x=TERMINAL_HEADER_TEXT_X;
     u16 header_cursor_y=TERMINAL_HEADER_TEXT_Y;
     for (u16 i=0;i<strlen(str);i++){
@@ -45,7 +44,7 @@ static inline void VBE_put_header_text(char *str,u32 color){
 }
 
 
-static inline void VBE_put_string_8x(char *str,u32 color){
+static inline void VBE_put_string_8x(char const *str, u32 color){
     u16 banner_cursor_x=BANNER_X;
     u16 banner_cursor_y=BANNER_Y;
     for (u32 i=0;i<strlen(str);i++){
@@ -66,27 +65,30 @@ static inline void VBE_put_string_8x(char *str,u32 color){
     }
 }
 
-static inline void VBE_scroll_down(){
+static inline void VBE_scroll_down(void)
+{
     for (int y=input_start_y;y<SCREEN_HEIGHT-VERTICAL_TERMINAL_BORDER_SIZE-CHAR_HEIGHT;y++){
         for (int x=input_start_x;x<SCREEN_WIDTH-LATERAL_TERMINAL_BORDER_SIZE-TERMINAL_PADDING_X;x++){
-            u32* pixel=(u8*)fb + pitch * y + 4 * x;
-            u32* pixel_down=(u8*)fb + pitch * (y+CHAR_HEIGHT) + 4 * x;
+            u32* pixel= (u32*)(fb + pitch * y + 4 * x);
+            u32* pixel_down= (u32*)(fb + pitch * (y+CHAR_HEIGHT) + 4 * x);
             *pixel=*pixel_down;
             pixel_down=NULL;
         }
     }
 }
 
-static inline void VBE_put_banner(){
+static inline void VBE_put_banner(void)
+{
     VBE_put_string_8x("BasicOS",YELLOW);
 }
 
-static inline void VBE_put_cursor(){
+static inline void VBE_put_cursor(void)
+{
     VBE_put_char('_',cursor_x,cursor_y,SILVER);
 }
 
 
-void VBE_put_char_terminal(char c){
+void VBE_put_char_terminal(char const c){
     if (c!=10){
     VBE_delete_char(cursor_x,cursor_y);
     VBE_put_char(c,cursor_x,cursor_y,char_color);
@@ -102,7 +104,8 @@ void VBE_put_char_terminal(char c){
     }
 }
 
-void VBE_set_newline(){
+void VBE_set_newline(void)
+{
     VBE_delete_char(cursor_x,cursor_y);
         cursor_x=TEXT_START_X;
         if (cursor_y>=(VERTICAL_TERMINAL_BORDER_SIZE+TERMINAL_HEIGHT-CHAR_HEIGHT*2-TERMINAL_PADDING_Y)){
@@ -118,13 +121,13 @@ static inline void VBE_change_char_color(u32 new_color){
 }
 
 
-void static inline VBE_put_terminal(u32 color){
+static inline void VBE_put_terminal(u32 color){
     for (u16 x=LATERAL_TERMINAL_BORDER_SIZE;x<(SCREEN_WIDTH-LATERAL_TERMINAL_BORDER_SIZE);x++){
         VBE_plot_pixel_32bpp(x,VERTICAL_TERMINAL_BORDER_SIZE,color);
         VBE_plot_pixel_32bpp(x,VERTICAL_TERMINAL_BORDER_SIZE+TERMINAL_HEADER_HEIGHT,color);
         VBE_plot_pixel_32bpp(x,VERTICAL_TERMINAL_BORDER_SIZE+TERMINAL_HEIGHT,color);
     }
-    
+
     for (u16 y=VERTICAL_TERMINAL_BORDER_SIZE;y<(SCREEN_HEIGHT-VERTICAL_TERMINAL_BORDER_SIZE);y++){
         VBE_plot_pixel_32bpp(LATERAL_TERMINAL_BORDER_SIZE,y,color);
         VBE_plot_pixel_32bpp(LATERAL_TERMINAL_BORDER_SIZE+TERMINAL_WIDTH,y,color);
@@ -134,14 +137,15 @@ void static inline VBE_put_terminal(u32 color){
 
 
 
-void  VBE_put_string_terminal(char *str){
+void  VBE_put_string_terminal(char const *str){
     for (u32 i=0;i<strlen(str);i++){
             VBE_put_char_terminal(str[i]);
         }
 }
 
 
-void VBE_delete_char_terminal(){
+void VBE_delete_char_terminal(void)
+{
     if ((cursor_y<=input_start_y) & (cursor_x<=input_start_x)){
     }
     else if ((cursor_y>=input_start_y) & (cursor_x<=input_start_x)){
@@ -166,32 +170,36 @@ void VBE_delete_char_terminal(){
 
 
 
-static inline void VBE_delete_terminal_text(){
+static inline void VBE_delete_terminal_text(void)
+{
     for (int y=TEXT_START_Y;y<SCREEN_HEIGHT-VERTICAL_TERMINAL_BORDER_SIZE-CHAR_HEIGHT;y++){
         for (int x=TEXT_START_X;x<SCREEN_WIDTH-LATERAL_TERMINAL_BORDER_SIZE-TERMINAL_PADDING_X;x++){
-            u32* pixel=(u8*)fb + pitch * y + 4 * x;
+            u32* pixel=(u32*)(fb + pitch * y + 4 * x);
             *pixel=BLACK;
         }
     }
 }
 
-static inline void VBE_delete_header_text(){
+static inline void VBE_delete_header_text(void)
+{
     for (int y=TERMINAL_HEADER_TEXT_Y;y<VERTICAL_TERMINAL_BORDER_SIZE+TERMINAL_HEADER_HEIGHT;y++){
         for (int x=TERMINAL_HEADER_TEXT_X;x<LATERAL_TERMINAL_BORDER_SIZE+TERMINAL_WIDTH;x++){
-            u32* pixel=(u8*)fb + pitch * y + 4 * x;
+            u32* pixel=(u32*)(fb + pitch * y + 4 * x);
             *pixel=BLACK;
         }
     }
 }
 
 
-static inline void VBE_initialize_main_window(){
+static inline void VBE_initialize_main_window(void)
+{
     VBE_put_banner();
     VBE_put_terminal(SILVER);
 }
 
 
-void VBE_switch_menu_window(){
+void VBE_switch_menu_window(void)
+{
     current_window=MENU_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
@@ -210,7 +218,8 @@ void VBE_switch_menu_window(){
     VBE_delete_char(cursor_x,cursor_y);
 }
 
-void VBE_switch_text_input_window(){
+void VBE_switch_text_input_window(void)
+{
     current_window=TEXT_INPUT_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
@@ -221,7 +230,8 @@ void VBE_switch_text_input_window(){
     VBE_put_cursor();
 }
 
-void VBE_switch_piano_window(){
+void VBE_switch_piano_window(void)
+{
     current_window=PIANO_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
@@ -229,7 +239,8 @@ void VBE_switch_piano_window(){
     VBE_put_piano();
 }
 
-void VBE_switch_image_window(){
+void VBE_switch_image_window(void)
+{
     current_window=IMAGE_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
@@ -237,23 +248,25 @@ void VBE_switch_image_window(){
     VBE_print_picture();
 }
 
-void VBE_quit(){
+void VBE_quit(void)
+{
     VBE_switch_menu_window();
 }
 
 
-void VBE_test_interface(){
+void VBE_test_interface(void)
+{
     if (flags>>12==1 && bpp==32){
     VBE_initialize_main_window();
-    VBE_switch_menu_window();
-    VBE_switch_piano_window();
-    VBE_quit();
-    VBE_switch_text_input_window();
-    VBE_put_string_terminal("ab");
-    VBE_delete_char_terminal();
-    VBE_delete_char_terminal();
-    VBE_delete_char_terminal();
-    VBE_put_char_terminal('z');
-    VBE_switch_image_window();
+    // VBE_switch_menu_window();
+    // VBE_switch_piano_window();
+    // VBE_quit();
+    // VBE_switch_text_input_window();
+    // VBE_put_string_terminal("ab");
+    // VBE_delete_char_terminal();
+    // VBE_delete_char_terminal();
+    // VBE_delete_char_terminal();
+    // VBE_put_char_terminal('z');
+    // VBE_switch_image_window();
     }
 }

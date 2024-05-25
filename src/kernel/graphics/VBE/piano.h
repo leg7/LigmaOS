@@ -15,7 +15,8 @@
 #define BLACK_KEY_COUNT 5
 #define WHITE_KEY_COUNT 7
 
-static enum key_position{
+enum key_position
+{
     POSITION_C       = PIANO_POSITION_X,
     POSITION_D       = PIANO_POSITION_X+WHITE_KEY_WIDTH,
     POSITION_E       = PIANO_POSITION_X+WHITE_KEY_WIDTH*2,

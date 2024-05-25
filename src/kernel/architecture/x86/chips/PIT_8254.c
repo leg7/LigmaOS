@@ -63,13 +63,13 @@ static inline void mode_set(union mode_command_byte m)
 void PIT_8254_initialize(void)
 {
 	// TODO: Make set channel 0 to tick at 44100 to play audio files
-	union mode_command_byte const b = {
-		.BCD_mode = false,
-		.operating_mode = OPERATING_MODE_3,
-		.access_mode = ACCESS_MODE_LOBYTE_HIBYTE,
-		.channel = CHANNEL_0,
-	};
-
+	// union mode_command_byte const b = {
+	// 	.BCD_mode = false,
+	// 	.operating_mode = OPERATING_MODE_3,
+	// 	.access_mode = ACCESS_MODE_LOBYTE_HIBYTE,
+	// 	.channel = CHANNEL_0,
+	// };
+	//
 	// u16 const frequency = 44100;
 }
 

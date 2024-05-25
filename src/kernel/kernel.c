@@ -22,7 +22,7 @@
 #include <drivers/input/PS2_keyboard.h>
 #include <drivers/time/RTC.h>
 
-void* fb;
+u32 fb;
 u32 pitch;
 u32 flags;
 u8 bpp;
@@ -32,19 +32,17 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	if (multiboot_output_magic != MULTIBOOT_OUTPUT_MAGIC) { // kernel wasn't loaded by a multiboot boot loader
 		return;
 	}
-	
-	fb = (void*)multiboot_info->framebuffer.address;
+
+	fb = (u32)multiboot_info->framebuffer.address;
 	pitch=multiboot_info->framebuffer.pitch;
 	flags=multiboot_info->flags;
-    bpp=multiboot_info->framebuffer.bpp;
+	bpp=multiboot_info->framebuffer.bpp;
 
 	#ifdef _SETTINGS_GRAPHICS_VBE
 		VBE_test_interface();
 	#else
 		VGA_text_mode_initialize();
 	#endif
-
-
 
 	GDT_initialize();
 	IDT_initialize();
@@ -53,7 +51,7 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	PS2_8042_initialize();
 	PIC_8259A_mask(0);
 	PIT_8254_initialize();
-	PIT_8254_frequency_play(500);
+	// PIT_8254_frequency_play(500);
 	// PIT_8254_frequency_stop();
 	RTC_initialize();
 

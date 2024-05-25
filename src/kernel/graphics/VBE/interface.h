@@ -10,12 +10,15 @@ enum VBE_window{
     IMAGE_WINDOW
 };
 
-void VBE_put_char_terminal(char c);
-void VBE_put_string_terminal(char *str);
-void VBE_delete_char_terminal();
-void VBE_switch_menu_window();
-void VBE_switch_text_input_window();
-void VBE_switch_piano_window();
-void VBE_switch_image_window();
-void VBE_quit();
-void VBE_test_interface();
+extern enum VBE_window current_window;
+
+void VBE_put_char_terminal(char const c);
+void VBE_put_string_terminal(char const *str);
+void VBE_delete_char_terminal(void);
+void VBE_switch_menu_window(void);
+void VBE_switch_text_input_window(void);
+void VBE_switch_piano_window(void);
+void VBE_switch_image_window(void);
+void VBE_quit(void);
+void VBE_test_interface(void);
+void VBE_set_newline(void);
