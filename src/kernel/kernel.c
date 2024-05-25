@@ -25,18 +25,21 @@
 void* fb;
 u32 pitch;
 u32 flags;
+u8 bpp;
 
 void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multiboot_info)
 {
 	if (multiboot_output_magic != MULTIBOOT_OUTPUT_MAGIC) { // kernel wasn't loaded by a multiboot boot loader
 		return;
 	}
+	
 	fb = (void*)multiboot_info->framebuffer.address;
 	pitch=multiboot_info->framebuffer.pitch;
 	flags=multiboot_info->flags;
+    bpp=multiboot_info->framebuffer.bpp;
 
 	#ifdef _SETTINGS_GRAPHICS_VBE
-		test_interface();
+		VBE_test_interface();
 	#else
 		VGA_text_mode_initialize();
 	#endif
