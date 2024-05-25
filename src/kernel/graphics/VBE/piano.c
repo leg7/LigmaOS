@@ -1,38 +1,7 @@
 #include "piano.h"
 #include <stdio.h>
 
-/*#define PIANO_OUTLINE_COLOR BLUE
-#define KEY_PRESS_COLOR SILVER
-#define PIANO_POSITION_X 230
-#define PIANO_POSITION_Y 280
-
-#define WHITE_KEY_WIDTH 80
-#define WHITE_KEY_HEIGHT 200
-#define BLACK_KEY_WIDTH 40
-#define BLACK_KEY_HEIGHT 150
-
-#define BLACK_KEY_COUNT 5
-#define WHITE_KEY_COUNT 7*/
-
-
-/*static enum key_position{
-    POSITION_C       = PIANO_POSITION_X,
-    POSITION_D       = PIANO_POSITION_X+WHITE_KEY_WIDTH,
-    POSITION_E       = PIANO_POSITION_X+WHITE_KEY_WIDTH*2,
-    POSITION_F       = PIANO_POSITION_X+WHITE_KEY_WIDTH*3,
-    POSITION_G       = PIANO_POSITION_X+WHITE_KEY_WIDTH*4,
-    POSITION_A       = PIANO_POSITION_X+WHITE_KEY_WIDTH*5,
-    POSITION_B       = PIANO_POSITION_X+WHITE_KEY_WIDTH*6,
-
-    POSITION_C_SHARP = PIANO_POSITION_X+WHITE_KEY_WIDTH-(BLACK_KEY_WIDTH/2),
-    POSITION_D_SHARP = PIANO_POSITION_X+WHITE_KEY_WIDTH*2-(BLACK_KEY_WIDTH/2),
-    POSITION_F_SHARP = PIANO_POSITION_X+WHITE_KEY_WIDTH*4-(BLACK_KEY_WIDTH/2),
-    POSITION_G_SHARP = PIANO_POSITION_X+WHITE_KEY_WIDTH*5-(BLACK_KEY_WIDTH/2),
-    POSITION_A_SHARP = PIANO_POSITION_X+WHITE_KEY_WIDTH*6-(BLACK_KEY_WIDTH/2)
-};*/
-
-
-
+#define KEY_CHAR_COLOR LIME
 
 
 void VBE_put_piano_outline(){
@@ -127,19 +96,55 @@ void fill_in_black_key(enum key_position pos,u32 color){
 
 void fill_in_key(enum key_position pos, u32 color){
 	switch(pos) {
-		case POSITION_C: fill_in_left_white_key     (POSITION_C, color) ; break;
-		case POSITION_D: fill_in_inbetween_white_key(POSITION_D, color) ; break;
-		case POSITION_E: fill_in_right_white_key    (POSITION_E, color) ; break;
-		case POSITION_F: fill_in_left_white_key     (POSITION_F, color) ; break;
-		case POSITION_G: fill_in_inbetween_white_key(POSITION_G, color) ; break;
-		case POSITION_A: fill_in_inbetween_white_key(POSITION_A, color) ; break;
-		case POSITION_B: fill_in_right_white_key    (POSITION_B, color) ; break;
+		case POSITION_C: 
+            fill_in_left_white_key(POSITION_C, color);
+            VBE_put_char_2x('q',pos+WHITE_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+WHITE_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            ; break;
+		case POSITION_D: 
+            fill_in_inbetween_white_key(POSITION_D, color);
+            VBE_put_char_2x('s',pos+WHITE_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+WHITE_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR); 
+            break;
+		case POSITION_E: 
+            fill_in_right_white_key    (POSITION_E, color); 
+            VBE_put_char_2x('d',pos+WHITE_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+WHITE_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
+		case POSITION_F: 
+            fill_in_left_white_key     (POSITION_F, color);
+            VBE_put_char_2x('f',pos+WHITE_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+WHITE_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
+		case POSITION_G: 
+            fill_in_inbetween_white_key(POSITION_G, color);
+            VBE_put_char_2x('g',pos+WHITE_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+WHITE_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
+		case POSITION_A:
+            fill_in_inbetween_white_key(POSITION_A, color); 
+            VBE_put_char_2x('h',pos+WHITE_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+WHITE_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
+		case POSITION_B:
+            fill_in_right_white_key(POSITION_B, color);
+            VBE_put_char_2x('j',pos+WHITE_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+WHITE_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
 
-		case POSITION_C_SHARP: fill_in_black_key(POSITION_C_SHARP, color); break;
-		case POSITION_D_SHARP: fill_in_black_key(POSITION_D_SHARP, color); break;
-		case POSITION_F_SHARP: fill_in_black_key(POSITION_F_SHARP, color); break;
-		case POSITION_G_SHARP: fill_in_black_key(POSITION_G_SHARP, color); break;
-		case POSITION_A_SHARP: fill_in_black_key(POSITION_A_SHARP, color); break;
+		case POSITION_C_SHARP:
+            fill_in_black_key(POSITION_C_SHARP, color); 
+            VBE_put_char_2x('z',pos+BLACK_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+BLACK_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
+		case POSITION_D_SHARP: 
+            fill_in_black_key(POSITION_D_SHARP, color);
+            VBE_put_char_2x('e',pos+BLACK_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+BLACK_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
+		case POSITION_F_SHARP: 
+            fill_in_black_key(POSITION_F_SHARP, color); 
+            VBE_put_char_2x('t',pos+BLACK_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+BLACK_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
+		case POSITION_G_SHARP: 
+            fill_in_black_key(POSITION_G_SHARP, color); 
+            VBE_put_char_2x('y',pos+BLACK_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+BLACK_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
+		case POSITION_A_SHARP: 
+            fill_in_black_key(POSITION_A_SHARP, color); 
+            VBE_put_char_2x('u',pos+BLACK_KEY_WIDTH/2-12/2,PIANO_POSITION_Y+BLACK_KEY_HEIGHT/2-12/2,KEY_CHAR_COLOR);
+            break;
 
 		default: printf("unhandeled case in fill key!\n");
 	}
@@ -159,13 +164,22 @@ void VBE_release_key(enum key_position pos){
 
 void VBE_put_piano(){
     VBE_put_piano_outline();
-    fill_in_left_white_key(POSITION_C,WHITE);
-    fill_in_inbetween_white_key(POSITION_D,WHITE);
-    fill_in_right_white_key(POSITION_E,WHITE);
-    fill_in_left_white_key(POSITION_F,WHITE);
-    fill_in_inbetween_white_key(POSITION_G,WHITE);
-    fill_in_inbetween_white_key(POSITION_A,WHITE);
-    fill_in_right_white_key(POSITION_B,WHITE);
+    fill_in_key(POSITION_C,WHITE);
+    fill_in_key(POSITION_D,WHITE);
+    fill_in_key(POSITION_E,WHITE);
+    fill_in_key(POSITION_F,WHITE);
+    fill_in_key(POSITION_G,WHITE);
+    fill_in_key(POSITION_A,WHITE);
+    fill_in_key(POSITION_B,WHITE);
+    
+    fill_in_key(POSITION_C_SHARP,BLACK);
+    fill_in_key(POSITION_D_SHARP,BLACK);
+    fill_in_key(POSITION_F_SHARP,BLACK);
+    fill_in_key(POSITION_G_SHARP,BLACK);
+    fill_in_key(POSITION_A_SHARP,BLACK);
+    
+    VBE_press_key(POSITION_C_SHARP);
+    VBE_press_key(POSITION_C);
 }
 
 

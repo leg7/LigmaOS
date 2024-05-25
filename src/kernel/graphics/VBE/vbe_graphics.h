@@ -36,6 +36,10 @@ void VBE_plot_pixel_32bpp(u16 x,u16 y,u32 color);
 
 void VBE_put_char(char c,u16 x,u16 y,u32 color);
 
+void VBE_put_char_2x(char c,u16 x,u16 y,u32 color);
+
+void VBE_put_string(char * s,u16 x,u16 y,u32 color);
+
 void VBE_delete_char(u16 x,u16 y);
 
 

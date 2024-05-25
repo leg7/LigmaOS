@@ -22,3 +22,4 @@ void VBE_switch_image_window(void);
 void VBE_quit(void);
 void VBE_test_interface(void);
 void VBE_set_newline(void);
+
