@@ -35,4 +35,4 @@ enum key_position
 
 void VBE_put_piano();
 void VBE_press_key(enum key_position pos);
-void VBE_relese_key(enum key_position pos);
+void VBE_release_key(enum key_position pos);
