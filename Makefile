@@ -2,7 +2,8 @@ OBJ_DIR    ?= ./build
 SRC_DIR    = ./src
 
 DEBUGGER   ?= gf2
-QEMU	     ?= qemu-system-i386
+QEMU       ?= qemu-system-i386
+QEMU_FLAGS ?= -cdrom $(OS_ISO) -audiodev pa,id=speaker -machine pcspk-audiodev=speaker
 
 CC         ?= i686-elf-gcc
 # TODO: fix gcc freestanding include bug
@@ -25,13 +26,12 @@ OBJ_GAS    := $(patsubst $(SRC_DIR)%.S, $(OBJ_DIR)%.S.o, $(SRC_GAS))
 
 DEPEND     := $(patsubst %.o, %.d, $(OBJ_C))
 DEPEND     += $(patsubst %.o, %.d, $(OBJ_GAS))
--include $(DEPEND)
 
 # Name is hardcoded in /isodir/grub/grub.cfg
 OS         = $(SRC_DIR)/isodir/boot/os.bin
 OS_ISO     = $(OBJ_DIR)/os.iso
 
-.PHONY: clean run debug all
+.PHONY: clean
 
 all: $(OS_ISO)
 
@@ -39,7 +39,6 @@ $(OS_ISO): $(OBJ_C) $(OBJ_NASM32) $(OBJ_GAS) Makefile
 	@printf "\n"
 	$(CC) -T linker.ld $(OBJ_C) $(OBJ_NASM32) $(OBJ_GAS) -o $(OS) $(LDFLAGS)
 	@printf "\n"
-	@echo $(DEPEND)
 	grub-file --is-x86-multiboot $(OS)
 	grub-mkrescue -o $(OS_ISO) $(SRC_DIR)/isodir
 
@@ -60,9 +59,31 @@ clean:
 	rm $(OS)
 
 run: all
-	$(QEMU) -cdrom $(OS_ISO)
+	$(QEMU) $(QEMU_FLAGS)
 
 debug: all
-	setsid -f $(QEMU) -cdrom $(OS_ISO) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
+	setsid -f $(QEMU) $(QEMU_FLAG) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
 
+
+-include $(DEPEND)
+
+DOC_DIR    = ./doc
+
+SRC_MD	   := $(shell find $(SRC_DIR) -type f -name '*.md')
+OBJ_MD	   := $(patsubst $(SRC_DIR)%.md, $(DOC_DIR)%.pdf, $(SRC_MD))
+
+SRC_MD_2   := $(shell find $(DOC_DIR) -maxdepth 1 -type f -name '*.md')
+OBJ_MD     += $(patsubst $(DOC_DIR)%.md, $(DOC_DIR)%.pdf, $(SRC_MD_2))
+
+$(DOC_DIR)/%.pdf: $(SRC_DIR)/%.md
+	@mkdir -p $(shell dirname $@)
+	pandoc -F mermaid-filter $< -o $@
+
+$(DOC_DIR)/%.pdf: $(DOC_DIR)/%.md
+	@mkdir -p $(shell dirname $@)
+	pandoc -F mermaid-filter $< -o $@
+
+doc: $(OBJ_MD) Makefile
+	# Workaround to delete garbage made from generating documents
+	find -name 'mermaid-filter.err' -exec rm {} \;

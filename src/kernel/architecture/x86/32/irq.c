@@ -1,11 +1,14 @@
 #include "irq.h"
 #include "idt.h"
 #include "isr.h"
-#include <architecture/x86/chips/PIC_8259A.h>
-#include <architecture/x86/chips/PS2_8042.h>
-#include <drivers/input/PS2_keyboard.h>
 #include <architecture/x86/io.h>
 #include <stdio.h>
+
+#include <architecture/x86/chips/PIC_8259A.h>
+#include <architecture/x86/chips/PS2_8042.h>
+#include <architecture/x86/chips/PIT_8254.h>
+#include <drivers/input/PS2_keyboard.h>
+#include <drivers/time/RTC.h>
 
 static ISR IRQ_OVERRIDES[16] = { nullptr };
 
@@ -53,7 +56,9 @@ void IRQ_initialize(void)
 		ISR_OVERRIDES[i] = dispatcher;
 	}
 
+	IRQ_OVERRIDES[0] = &PIT_8254_IRQ_0_handler;
 	IRQ_OVERRIDES[1] = &PS2_keyboard_IRQ_1_handler;
+	IRQ_OVERRIDES[8] = &RTC_IRQ_8_handler;
 	IRQ_OVERRIDES[12] = &PS2_8042_IRQ_12_handler;
 
 	IRQ_enable();
