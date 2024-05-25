@@ -11,7 +11,7 @@ CC         ?= i686-elf-gcc
 # -ffreestanding should disable this. The problem is that if I add -nostdinc I loose access to
 # the headers that should be available in freestanding mode like stddef.h. So for now I will
 # not use `-nostdinc` and just deal with the bug later
-CFLAGS     = -std=c2x -ffreestanding -nostdlib -I '$(SRC_DIR)/kernel' -I '$(SRC_DIR)/libc' -I '$(SRC_DIR)/libc/libk' -MMD -MP -Wall -Wextra -Wpedantic -Wvla -Wimplicit-fallthrough -fanalyzer -ggdb
+CFLAGS     = -std=c2x -ffreestanding -nostdlib -I '$(SRC_DIR)/kernel' -I '$(SRC_DIR)/libc' -I '$(SRC_DIR)/libc/libk' -MMD -MP -Wall -Wextra -Wpedantic -Wvla -Wimplicit-fallthrough -Wno-unused-parameter -O3
 LDFLAGS    = -ffreestanding -nostdlib -lgcc -ggdb
 SRC_C      := $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJ_C      := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.c.o, $(SRC_C))
