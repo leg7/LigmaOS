@@ -7,7 +7,7 @@
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
 
-static enum basic_color{
+static enum VBE_basic_color{
     WHITE=0x00FFFFFF,
     SILVER=0x00C0C0C0,
     GRAY=0x00808080,
@@ -29,7 +29,7 @@ static enum basic_color{
 extern int font8x8_basic[95][8];
 extern void* fb;
 extern u32 pitch;
-
+extern u8 bpp;
 
 void VBE_plot_pixel_32bpp(u16 x,u16 y,u32 color);
 

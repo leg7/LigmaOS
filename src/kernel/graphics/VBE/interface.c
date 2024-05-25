@@ -31,6 +31,8 @@ u16 cursor_y=TEXT_START_Y;
 u16 input_start_x=TEXT_START_X;
 u16 input_start_y=TEXT_START_Y;
 
+enum VBE_window current_window=MENU_WINDOW;
+
 
 static inline void VBE_put_header_text(char *str,u32 color){
     u16 header_cursor_x=TERMINAL_HEADER_TEXT_X;
@@ -189,39 +191,69 @@ static inline void VBE_initialize_main_window(){
 }
 
 
-static inline void VBE_switch_menu_window(){
+void VBE_switch_menu_window(){
+    current_window=MENU_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
-    VBE_put_header_text("Main Menu",LIME);
+    VBE_put_header_text(" Main Menu",LIME);
     cursor_x=TEXT_START_X;
     cursor_y=TEXT_START_Y;
     char_color=LIME;
     VBE_set_newline();
-    VBE_put_string_terminal("Play piano: CTRL+P");
+    VBE_put_string_terminal(" Play piano: CTRL+P");
     VBE_set_newline();
     VBE_set_newline();
-    VBE_put_string_terminal("Print image: CTRL+I");
+    VBE_put_string_terminal(" Print image: CTRL+I");
     VBE_set_newline();
     VBE_set_newline();
-    VBE_put_string_terminal("Text input: CTRL+T");
+    VBE_put_string_terminal(" Text input: CTRL+T");
     VBE_delete_char(cursor_x,cursor_y);
 }
 
-static inline void VBE_switch_piano_window(){
+void VBE_switch_text_input_window(){
+    current_window=TEXT_INPUT_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
-    VBE_put_header_text("Piano",LIME);
+    VBE_put_header_text(" Text Input",LIME);
+    char_color=FUCHSIA;
+    cursor_x=TEXT_START_X;
+    cursor_y=TEXT_START_Y;
+    VBE_put_cursor();
+}
+
+void VBE_switch_piano_window(){
+    current_window=PIANO_WINDOW;
+    VBE_delete_terminal_text();
+    VBE_delete_header_text();
+    VBE_put_header_text(" Piano (12 notes) ",LIME);
     VBE_put_piano();
 }
 
-static inline void VBE_quit(){
+void VBE_switch_image_window(){
+    current_window=IMAGE_WINDOW;
+    VBE_delete_terminal_text();
+    VBE_delete_header_text();
+    VBE_put_header_text(" Bird image",LIME);
+    VBE_print_picture();
+}
+
+void VBE_quit(){
     VBE_switch_menu_window();
 }
 
 
 void VBE_test_interface(){
+    if (flags>>12==1 && bpp==32){
     VBE_initialize_main_window();
     VBE_switch_menu_window();
     VBE_switch_piano_window();
-    
+    VBE_quit();
+    VBE_switch_text_input_window();
+    VBE_put_string_terminal("ab");
+    VBE_delete_char_terminal();
+    VBE_delete_char_terminal();
+    VBE_delete_char_terminal();
+    VBE_put_char_terminal('z');
+    VBE_switch_image_window();
+    }
 }
