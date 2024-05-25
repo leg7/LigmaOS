@@ -62,7 +62,7 @@ run: all
 	$(QEMU) $(QEMU_FLAGS)
 
 debug: all
-	setsid -f $(QEMU) $(QEMU_FLAG) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
+	setsid -f $(QEMU) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic* $(QEMU_FLAGS)
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
 
 
