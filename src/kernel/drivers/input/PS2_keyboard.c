@@ -1,9 +1,11 @@
 #include "PS2_keyboard.h"
 #include <architecture/x86/chips/PS2_8042.h>
+#include <architecture/x86/chips/PIT_8254.h>
+#include <graphics/VBE/interface.h>
 #include <library/types.h>
 #include <stdio.h>
 
-// TODO: check chat scan code set the keyboard is using
+// TODO: check what scan code set the keyboard is using
 // TODO: support scan code sets 1 and 3
 // TODO: support sending commands to the controller
 
@@ -495,25 +497,130 @@ void PS2_keyboard_IRQ_1_handler(struct ISR_parameters const *p)
 	// printf("%X\t %s\n", scancode, token_string[token]);
 
 	if (state == STATE_KEY_PRESSED || state == STATE_KEY_RELEASED) {
-		union keycode k;
+		union keycode keycode;
 
 		if (token == TOKEN_SCANCODE) {
-			k = scancode_to_keycode[scancode];
+			keycode = scancode_to_keycode[scancode];
 		} else if (token == TOKEN_SCANCODE_EXTENDED) {
-			k = scancode_extended_to_keycode[scancode];
+			keycode = scancode_extended_to_keycode[scancode];
 		} else {
 			shortcut:
-			k = PAUSE_KEYCODE;
+			keycode = PAUSE_KEYCODE;
 		}
 
 		if (state == STATE_KEY_PRESSED) {
-			KEYCODE_IS_PRESSED[k.code] = true;
-            putchar(keycode_to_key[k.row][k.column]);
+			KEYCODE_IS_PRESSED[keycode.code] = true;
 		} else {
-			KEYCODE_IS_PRESSED[k.code] = false;
+			KEYCODE_IS_PRESSED[keycode.code] = false;
 			KEYCODE_IS_PRESSED[PAUSE_KEYCODE.code] = false;
+		}
+
+		// vbe
+		static constexpr union keycode left_control = { .row = 5, .column = 0 };
+		static constexpr union keycode a = { .row = 3, .column = 1 };
+		static constexpr union keycode t = { .row = 2, .column = 5 };
+
+		switch (current_window) {
+			case MENU_WINDOW: {
+				static constexpr union keycode p = { .row = 2, .column = 10 };
+				static constexpr union keycode i = { .row = 2, .column = 8 };
+
+
+				if (KEYCODE_IS_PRESSED[left_control.code]) {
+				if (KEYCODE_IS_PRESSED[p.code]) {
+						VBE_switch_piano_window();
+					} else if (KEYCODE_IS_PRESSED[i.code]) {
+						VBE_switch_image_window();
+					} else if (KEYCODE_IS_PRESSED[t.code]) {
+						VBE_switch_text_input_window();
+					}
+				}
+			}
+			break;
+
+			case PIANO_WINDOW: {
+				// white keys
+				static constexpr union keycode a = { .row = 3, .column = 1 };
+				static constexpr union keycode s = { .row = 3, .column = 2 };
+				static constexpr union keycode d = { .row = 3, .column = 3 };
+				static constexpr union keycode f = { .row = 3, .column = 4 };
+				static constexpr union keycode g = { .row = 3, .column = 5 };
+				static constexpr union keycode h = { .row = 3, .column = 6 };
+				static constexpr union keycode j = { .row = 3, .column = 7 };
+
+				// black keys
+				static constexpr union keycode w = { .row = 2, .column = 2 };
+				static constexpr union keycode e = { .row = 2, .column = 3 };
+				// t
+				static constexpr union keycode y = { .row = 2, .column = 6 };
+				static constexpr union keycode u = { .row = 2, .column = 7 };
+
+				static u16 old_frequency = 0;
+				u16 frequency = 0;
+
+				if (KEYCODE_IS_PRESSED[a.code]) frequency += 261;
+				if (KEYCODE_IS_PRESSED[s.code]) frequency += 293;
+				if (KEYCODE_IS_PRESSED[d.code]) frequency += 329;
+				if (KEYCODE_IS_PRESSED[f.code]) frequency += 349;
+				if (KEYCODE_IS_PRESSED[g.code]) frequency += 392;
+				if (KEYCODE_IS_PRESSED[h.code]) frequency += 440;
+				if (KEYCODE_IS_PRESSED[j.code]) frequency += 493;
+
+				if (KEYCODE_IS_PRESSED[w.code]) frequency += 277;
+				if (KEYCODE_IS_PRESSED[e.code]) frequency += 311;
+				if (KEYCODE_IS_PRESSED[t.code]) frequency += 369;
+				if (KEYCODE_IS_PRESSED[y.code]) frequency += 415;
+				if (KEYCODE_IS_PRESSED[u.code]) frequency += 466;
+
+				if (!KEYCODE_IS_PRESSED[a.code] && !KEYCODE_IS_PRESSED[s.code] &&
+				    !KEYCODE_IS_PRESSED[d.code] && !KEYCODE_IS_PRESSED[f.code] &&
+				    !KEYCODE_IS_PRESSED[g.code] && !KEYCODE_IS_PRESSED[h.code] &&
+				    !KEYCODE_IS_PRESSED[j.code] && !KEYCODE_IS_PRESSED[w.code] &&
+				    !KEYCODE_IS_PRESSED[e.code] && !KEYCODE_IS_PRESSED[t.code] &&
+				    !KEYCODE_IS_PRESSED[y.code] && !KEYCODE_IS_PRESSED[u.code]) {
+					PIT_8254_frequency_stop();
+				} else if (old_frequency != frequency){
+					PIT_8254_frequency_play(frequency);
+				}
+
+				old_frequency = frequency;
+
+				if (KEYCODE_IS_PRESSED[left_control.code] && KEYCODE_IS_PRESSED[a.code]) {
+					PIT_8254_frequency_stop();
+					VBE_switch_menu_window();
+				}
+			}
+			break;
+
+			case TEXT_INPUT_WINDOW: {
+				static constexpr union keycode backspace = { .row = 1, .column = 13 };
+				static constexpr union keycode enter = { .row = 3, .column = 12 };
+
+				if (state == STATE_KEY_PRESSED) {
+					if (keycode.code == backspace.code) {
+						VBE_delete_char_terminal();
+					} else if (keycode.code == enter.code) {
+						VBE_set_newline();
+					} else {
+						putchar(keycode_to_key[keycode.row][keycode.column]);
+					}
+				}
+
+				if (KEYCODE_IS_PRESSED[left_control.code] && KEYCODE_IS_PRESSED[a.code]) {
+					VBE_switch_menu_window();
+				}
+			}
+			break;
+
+			case IMAGE_WINDOW: {
+				if (KEYCODE_IS_PRESSED[left_control.code] && KEYCODE_IS_PRESSED[a.code]) {
+					VBE_switch_menu_window();
+				}
+			}
+			break;
 		}
 
 		state = STATE_INITIAL;
 	}
+
 }

@@ -11,7 +11,7 @@ CC         ?= i686-elf-gcc
 # -ffreestanding should disable this. The problem is that if I add -nostdinc I loose access to
 # the headers that should be available in freestanding mode like stddef.h. So for now I will
 # not use `-nostdinc` and just deal with the bug later
-CFLAGS     = -std=c2x -ffreestanding -nostdlib -I '$(SRC_DIR)/kernel' -I '$(SRC_DIR)/libc' -I '$(SRC_DIR)/libc/libk' -MMD -MP -Wall -Wextra -Wpedantic -Wvla -Wimplicit-fallthrough -fanalyzer -ggdb
+CFLAGS     = -std=c2x -ffreestanding -nostdlib -I '$(SRC_DIR)/kernel' -I '$(SRC_DIR)/libc' -I '$(SRC_DIR)/libc/libk' -MMD -MP -Wall -Wextra -Wpedantic -Wvla -Wimplicit-fallthrough -Wno-unused-parameter -O3
 LDFLAGS    = -ffreestanding -nostdlib -lgcc -ggdb
 SRC_C      := $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJ_C      := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.c.o, $(SRC_C))
@@ -62,7 +62,7 @@ run: all
 	$(QEMU) $(QEMU_FLAGS)
 
 debug: all
-	setsid -f $(QEMU) $(QEMU_FLAG) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic*
+	setsid -f $(QEMU) -S -gdb tcp::26000 -no-shutdown -no-reboot -d int -trace pic* $(QEMU_FLAGS)
 	!(pgrep $(DEBUGGER)) && setsid -f $(DEBUGGER) &
 
 
@@ -78,11 +78,11 @@ OBJ_MD     += $(patsubst $(DOC_DIR)%.md, $(DOC_DIR)%.pdf, $(SRC_MD_2))
 
 $(DOC_DIR)/%.pdf: $(SRC_DIR)/%.md
 	@mkdir -p $(shell dirname $@)
-	pandoc -F mermaid-filter $< -o $@
+	pandoc --number-sections -F mermaid-filter $< -o $@
 
 $(DOC_DIR)/%.pdf: $(DOC_DIR)/%.md
 	@mkdir -p $(shell dirname $@)
-	pandoc -F mermaid-filter $< -o $@
+	pandoc --number-sections -F mermaid-filter $< -o $@
 
 doc: $(OBJ_MD) Makefile
 	# Workaround to delete garbage made from generating documents
