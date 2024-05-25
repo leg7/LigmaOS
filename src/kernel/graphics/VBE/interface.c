@@ -146,21 +146,22 @@ void  VBE_put_string_terminal(char const *str){
 
 void VBE_delete_char_terminal(void)
 {
-    if ((cursor_y<=input_start_y) & (cursor_x<=input_start_x)){
+    
+    if ((cursor_y<=input_start_y) && (cursor_x<=input_start_x)){
     }
-    else if ((cursor_y>=input_start_y) & (cursor_x<=input_start_x)){
+    else if ((cursor_y>=input_start_y) && (cursor_x<=input_start_x)){
             VBE_delete_char(cursor_x,cursor_y);
             cursor_y-=CHAR_HEIGHT;
             cursor_x=LATERAL_TERMINAL_BORDER_SIZE+TERMINAL_PADDING_X+TERMINAL_WIDTH/CHAR_WIDTH*CHAR_WIDTH-CHAR_WIDTH;
             cursor_x-=CHAR_WIDTH;
             VBE_delete_char(cursor_x,cursor_y);
         }
-    else if ((cursor_y>=input_start_y) & (cursor_x>=input_start_x)){
+    else if ((cursor_y>=input_start_y) && (cursor_x>=input_start_x)){
         VBE_delete_char(cursor_x,cursor_y);
         cursor_x-=CHAR_WIDTH;
         VBE_delete_char(cursor_x,cursor_y);
     }
-    else if ((cursor_y<=input_start_y) & (cursor_x>=input_start_x)){
+    else if ((cursor_y<=input_start_y) && (cursor_x>=input_start_x)){
         VBE_delete_char(cursor_x,cursor_y);
         cursor_x-=CHAR_WIDTH;
         VBE_delete_char(cursor_x,cursor_y);
@@ -212,7 +213,7 @@ void VBE_switch_menu_window(void)
     VBE_put_string_terminal(" Play piano: CTRL+P");
     VBE_set_newline();
     VBE_set_newline();
-    VBE_put_string_terminal(" Print image: CTRL+I");
+    VBE_put_string_terminal(" Display muystery image: CTRL+I");
     VBE_set_newline();
     VBE_set_newline();
     VBE_put_string_terminal(" Text input: CTRL+T");
@@ -259,6 +260,5 @@ void VBE_test_interface(void)
 {
     if (flags>>12==1 && bpp==32){
     VBE_initialize_main_window();
-    VBE_switch_text_input_window();
     }
 }
