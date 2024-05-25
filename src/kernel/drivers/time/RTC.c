@@ -8,9 +8,10 @@ how the chip works */
 
 #define DATE_X 5
 #define DATE_Y 5
+#define OFFSET 16
 
-#define TIME_X 1024-5
-#define TIME_Y 1024-5
+#define TIME_X 1024 - 200
+#define TIME_Y 5
 
 enum : u8
 {
@@ -127,6 +128,31 @@ static inline void acknowledge_interrupt(void)
 struct RTC_time RTC_TIME;
 struct RTC_date RTC_DATE;
 
+static inline void unsigned_print(unsigned c, u16 *x, u16 y, u32 color)
+{
+	if (c == 0) {
+		VBE_put_char_2x('0', *x, y, color);
+		*x += OFFSET;
+		return;
+	}
+
+	constexpr int8_t stack_size = 32;
+	char stack[stack_size]; // should be big enough for any float or 64bit number
+	int8_t stack_len = 0;
+
+	while (c != 0) {
+		const int modulo = c % 10; // TODO: I hope gcc optimizes this correctly
+		c /= 10;
+
+		stack[stack_len++] = modulo;
+	}
+
+	while (--stack_len >= 0) {
+		VBE_put_char_2x('0' + stack[stack_len], *x, y, color);
+		*x += OFFSET;
+	}
+}
+
 void RTC_IRQ_8_handler(struct ISR_parameters const *p)
 {
 	RTC_TIME.seconds  = get_register(SELECT_SECONDS);
@@ -139,9 +165,40 @@ void RTC_IRQ_8_handler(struct ISR_parameters const *p)
 	// TODO: Check if the RTC century register exists with ACPI
 	RTC_DATE.year     = get_register(SELECT_YEAR) + get_register(SELECT_CENTURY) * 100;
 
-	
-    
-    
+	for (u16 x = DATE_X; x < DATE_X + 200; ++x) {
+		for (u16 y = DATE_Y; y < DATE_Y + 16; ++y) {
+			VBE_plot_pixel_32bpp(x, y, BLACK);
+		}
+	}
+{
+	u16 x = DATE_X;
+	u16 const y = DATE_Y;
+	enum VBE_basic_color const color = AQUA;
+	unsigned_print(RTC_DATE.day, &x, y, color);
+	VBE_put_char_2x('/', x, y, color);
+	x += OFFSET;
+	unsigned_print(RTC_DATE.month, &x, y, color);
+	VBE_put_char_2x('/', x, y, color);
+	x += OFFSET;
+	unsigned_print(RTC_DATE.year, &x, y, color);
+}
+	for (u16 x = TIME_X; x < TIME_X + 200; ++x) {
+		for (u16 y = TIME_Y; y < TIME_Y + 16; ++y) {
+			VBE_plot_pixel_32bpp(x, y, BLACK);
+		}
+	}
+{
+	u16 x = TIME_X;
+	u16 const y = TIME_Y;
+	enum VBE_basic_color const color = FUCHSIA;
+	unsigned_print(RTC_TIME.hours_24, &x, y, color);
+	VBE_put_char_2x(':', x, y, color);
+	x += OFFSET;
+	unsigned_print(RTC_TIME.minutes, &x, y, color);
+	VBE_put_char_2x(':', x, y, color);
+	x += OFFSET;
+	unsigned_print(RTC_TIME.seconds, &x, y, color);
+}
 
 	acknowledge_interrupt();
 }

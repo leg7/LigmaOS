@@ -48,7 +48,13 @@ void VBE_put_string(char * s,u16 x,u16 y,u32 color){
     }
 }
 
-
+void VBE_delete_char_2x(u16 x,u16 y){
+    for (u8 row = 0; row < CHAR_WIDTH*2; row++) {
+        for (u8 col = 0; col < CHAR_HEIGHT*2; col++) {
+            VBE_plot_pixel_32bpp(col+x,row+y,BLACK);
+        }
+    }
+}
 
 
 
