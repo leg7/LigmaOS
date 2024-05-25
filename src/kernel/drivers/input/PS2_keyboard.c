@@ -558,19 +558,19 @@ void PS2_keyboard_IRQ_1_handler(struct ISR_parameters const *p)
 				static u16 old_frequency = 0;
 				u16 frequency = 0;
 
-				if (KEYCODE_IS_PRESSED[a.code]) frequency += 261;
-				if (KEYCODE_IS_PRESSED[s.code]) frequency += 293;
-				if (KEYCODE_IS_PRESSED[d.code]) frequency += 329;
-				if (KEYCODE_IS_PRESSED[f.code]) frequency += 349;
-				if (KEYCODE_IS_PRESSED[g.code]) frequency += 392;
-				if (KEYCODE_IS_PRESSED[h.code]) frequency += 440;
-				if (KEYCODE_IS_PRESSED[j.code]) frequency += 493;
+				if (KEYCODE_IS_PRESSED[a.code]) { frequency = 261; VBE_press_key(POSITION_C);       } else { VBE_release_key(POSITION_C);       }
+				if (KEYCODE_IS_PRESSED[s.code]) { frequency = 293; VBE_press_key(POSITION_D);       } else { VBE_release_key(POSITION_D);       }
+				if (KEYCODE_IS_PRESSED[d.code]) { frequency = 329; VBE_press_key(POSITION_E);       } else { VBE_release_key(POSITION_E);       }
+				if (KEYCODE_IS_PRESSED[f.code]) { frequency = 349; VBE_press_key(POSITION_F);       } else { VBE_release_key(POSITION_F);       }
+				if (KEYCODE_IS_PRESSED[g.code]) { frequency = 392; VBE_press_key(POSITION_G);       } else { VBE_release_key(POSITION_G);       }
+				if (KEYCODE_IS_PRESSED[h.code]) { frequency = 440; VBE_press_key(POSITION_A);       } else { VBE_release_key(POSITION_A);       }
+				if (KEYCODE_IS_PRESSED[j.code]) { frequency = 493; VBE_press_key(POSITION_B);       } else { VBE_release_key(POSITION_B);       }
 
-				if (KEYCODE_IS_PRESSED[w.code]) frequency += 277;
-				if (KEYCODE_IS_PRESSED[e.code]) frequency += 311;
-				if (KEYCODE_IS_PRESSED[t.code]) frequency += 369;
-				if (KEYCODE_IS_PRESSED[y.code]) frequency += 415;
-				if (KEYCODE_IS_PRESSED[u.code]) frequency += 466;
+				if (KEYCODE_IS_PRESSED[w.code]) { frequency = 277; VBE_press_key(POSITION_C_SHARP); } else { VBE_release_key(POSITION_C_SHARP); }
+				if (KEYCODE_IS_PRESSED[e.code]) { frequency = 311; VBE_press_key(POSITION_D_SHARP); } else { VBE_release_key(POSITION_D_SHARP); }
+				if (KEYCODE_IS_PRESSED[t.code]) { frequency = 369; VBE_press_key(POSITION_F_SHARP); } else { VBE_release_key(POSITION_F_SHARP); }
+				if (KEYCODE_IS_PRESSED[y.code]) { frequency = 415; VBE_press_key(POSITION_G_SHARP); } else { VBE_release_key(POSITION_G_SHARP); }
+				if (KEYCODE_IS_PRESSED[u.code]) { frequency = 466; VBE_press_key(POSITION_A_SHARP); } else { VBE_release_key(POSITION_A_SHARP); }
 
 				if (!KEYCODE_IS_PRESSED[a.code] && !KEYCODE_IS_PRESSED[s.code] &&
 				    !KEYCODE_IS_PRESSED[d.code] && !KEYCODE_IS_PRESSED[f.code] &&
