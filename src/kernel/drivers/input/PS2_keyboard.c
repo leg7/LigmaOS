@@ -508,7 +508,7 @@ void PS2_keyboard_IRQ_1_handler(struct ISR_parameters const *p)
 
 		if (state == STATE_KEY_PRESSED) {
 			KEYCODE_IS_PRESSED[k.code] = true;
-			// putchar(keycode_to_key[k.row][k.column]);
+            putchar(keycode_to_key[k.row][k.column]);
 		} else {
 			KEYCODE_IS_PRESSED[k.code] = false;
 			KEYCODE_IS_PRESSED[PAUSE_KEYCODE.code] = false;

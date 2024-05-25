@@ -89,18 +89,18 @@ static inline void VBE_put_cursor(void)
 
 
 void VBE_put_char_terminal(char const c){
-    if (c!=10){
-    VBE_delete_char(cursor_x,cursor_y);
-    VBE_put_char(c,cursor_x,cursor_y,char_color);
-    cursor_x+=CHAR_WIDTH;
-    if (cursor_x>=LATERAL_TERMINAL_BORDER_SIZE+TERMINAL_WIDTH/8*8-CHAR_WIDTH){
-        cursor_x=TEXT_START_X;
-        if (cursor_y>=(VERTICAL_TERMINAL_BORDER_SIZE+TERMINAL_HEIGHT-CHAR_HEIGHT*2-TERMINAL_PADDING_Y)){
-            VBE_scroll_down();
+    if ((c+ASCII_BITMAP_SHIFT>=0) && (c+ASCII_BITMAP_SHIFT<=95)){
+        VBE_delete_char(cursor_x,cursor_y);
+        VBE_put_char(c,cursor_x,cursor_y,char_color);
+        cursor_x+=CHAR_WIDTH;
+        if (cursor_x>=LATERAL_TERMINAL_BORDER_SIZE+TERMINAL_WIDTH/8*8-CHAR_WIDTH){
+            cursor_x=TEXT_START_X;
+            if (cursor_y>=(VERTICAL_TERMINAL_BORDER_SIZE+TERMINAL_HEIGHT-CHAR_HEIGHT*2-TERMINAL_PADDING_Y)){
+                VBE_scroll_down();
+            }
+            else cursor_y+=CHAR_HEIGHT;
         }
-        else cursor_y+=CHAR_HEIGHT;
-    }
-    VBE_put_cursor();
+        VBE_put_cursor();
     }
 }
 
@@ -235,7 +235,7 @@ void VBE_switch_piano_window(void)
     current_window=PIANO_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
-    VBE_put_header_text(" Piano (12 notes) ",LIME);
+    VBE_put_header_text(" Piano 12 notes (CTRL+Q : quit) ",LIME);
     VBE_put_piano();
 }
 
@@ -244,7 +244,7 @@ void VBE_switch_image_window(void)
     current_window=IMAGE_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
-    VBE_put_header_text(" Bird image",LIME);
+    VBE_put_header_text(" Bird image (CTRL+Q : quit)",LIME);
     VBE_print_picture();
 }
 
@@ -258,15 +258,6 @@ void VBE_test_interface(void)
 {
     if (flags>>12==1 && bpp==32){
     VBE_initialize_main_window();
-    // VBE_switch_menu_window();
-    // VBE_switch_piano_window();
-    // VBE_quit();
-    // VBE_switch_text_input_window();
-    // VBE_put_string_terminal("ab");
-    // VBE_delete_char_terminal();
-    // VBE_delete_char_terminal();
-    // VBE_delete_char_terminal();
-    // VBE_put_char_terminal('z');
-    // VBE_switch_image_window();
+    VBE_switch_text_input_window();
     }
 }

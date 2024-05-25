@@ -2,8 +2,15 @@
 #include <stdio.h>
 #include <architecture/x86/io.h>
 #include <architecture/x86/32/irq.h>
+#include <graphics/VBE/vbe_graphics.h>
 /* Consult the IBM PC AT technical reference for more information about
 how the chip works */
+
+#define DATE_X 5
+#define DATE_Y 5
+
+#define TIME_X 1024-5
+#define TIME_Y 1024-5
 
 enum : u8
 {
@@ -132,8 +139,9 @@ void RTC_IRQ_8_handler(struct ISR_parameters const *p)
 	// TODO: Check if the RTC century register exists with ACPI
 	RTC_DATE.year     = get_register(SELECT_YEAR) + get_register(SELECT_CENTURY) * 100;
 
-	// printf("%u %u/%u/%u\t", RTC_DATE.weekday, RTC_DATE.day, RTC_DATE.month, RTC_DATE.year);
-	// printf("%u:%u:%u\n", RTC_TIME.hours_24, RTC_TIME.minutes, RTC_TIME.seconds);
+	
+    
+    
 
 	acknowledge_interrupt();
 }

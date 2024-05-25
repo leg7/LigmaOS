@@ -52,7 +52,6 @@ void kernel_main(const u32 multiboot_output_magic, struct multiboot_info* multib
 	PIC_8259A_mask(0);
 	PIT_8254_initialize();
 	// PIT_8254_frequency_play(500);
-	// PIT_8254_frequency_stop();
 	RTC_initialize();
 
 	for (;;) {

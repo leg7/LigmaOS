@@ -1,5 +1,4 @@
 #include <library/types.h>
-const u32 VBE_image[];
 const u16 VBE_image_height=484;
 const u16 VBE_image_width=728;
 

@@ -26,6 +26,14 @@ void VBE_delete_char(u16 x,u16 y){
     }
 }
 
+void VBE_put_string(char * s,u16 x,u16 y,u32 color){
+    u16  tmp_cursor_x=x;
+    for (u16 i=0;i<strlen(s);i++){
+        VBE_put_char(s[i],tmp_cursor_x,y,color);
+        tmp_cursor_x+=8;
+    }
+}
+
 
 
 
