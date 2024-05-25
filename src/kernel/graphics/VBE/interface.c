@@ -193,8 +193,9 @@ static inline void VBE_delete_header_text(void)
 
 static inline void VBE_initialize_main_window(void)
 {
-    VBE_put_banner();
-    VBE_put_terminal(SILVER);
+	VBE_put_banner();
+	VBE_put_terminal(SILVER);
+	VBE_switch_menu_window();
 }
 
 
