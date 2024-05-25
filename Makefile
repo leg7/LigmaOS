@@ -78,11 +78,11 @@ OBJ_MD     += $(patsubst $(DOC_DIR)%.md, $(DOC_DIR)%.pdf, $(SRC_MD_2))
 
 $(DOC_DIR)/%.pdf: $(SRC_DIR)/%.md
 	@mkdir -p $(shell dirname $@)
-	pandoc -F mermaid-filter $< -o $@
+	pandoc --number-sections -F mermaid-filter $< -o $@
 
 $(DOC_DIR)/%.pdf: $(DOC_DIR)/%.md
 	@mkdir -p $(shell dirname $@)
-	pandoc -F mermaid-filter $< -o $@
+	pandoc --number-sections -F mermaid-filter $< -o $@
 
 doc: $(OBJ_MD) Makefile
 	# Workaround to delete garbage made from generating documents
