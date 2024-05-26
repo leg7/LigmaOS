@@ -35,22 +35,22 @@ OS_ISO     = $(OBJ_DIR)/os.iso
 
 all: $(OS_ISO)
 
-$(OS_ISO): $(OBJ_C) $(OBJ_NASM32) $(OBJ_GAS) Makefile
+$(OS_ISO): $(OBJ_C) $(OBJ_NASM32) $(OBJ_GAS)
 	@printf "\n"
 	$(CC) -T linker.ld $(OBJ_C) $(OBJ_NASM32) $(OBJ_GAS) -o $(OS) $(LDFLAGS)
 	@printf "\n"
 	grub-file --is-x86-multiboot $(OS)
 	grub-mkrescue -o $(OS_ISO) $(SRC_DIR)/isodir
 
-$(OBJ_DIR)/%.c.o: $(SRC_DIR)/%.c
+$(OBJ_DIR)/%.c.o: $(SRC_DIR)/%.c Makefile
 	@mkdir -p $(shell dirname $@)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-$(OBJ_DIR)/%.nasm32.o: $(SRC_DIR)/%.nasm32.asm
+$(OBJ_DIR)/%.nasm32.o: $(SRC_DIR)/%.nasm32.asm Makefile
 	@mkdir -p $(shell dirname $@)
 	nasm $< -o $@ $(NASM32_FLAGS)
 
-$(OBJ_DIR)/%.S.o: $(SRC_DIR)/%.S
+$(OBJ_DIR)/%.S.o: $(SRC_DIR)/%.S Makefile
 	@mkdir -p $(shell dirname $@)
 	$(CC) -c $< -o $@ $(CFLAGS)
 

@@ -10,7 +10,7 @@ end
 
 define os-start
 	os-setup
-	break src/kernel/kernel.c:15
+	break kernel_main
 	continue
 end
 
