@@ -1,8 +1,84 @@
 ---
+colorlinks: true
 title: Rapport de stage OS 2024
 author: Daniel Cojucari, Leonard Gomez
 output: pdf_document
 ---
+
+# Environement de development
+
+Pour tester notre OS on pourrait flasher l'ISO sur une clef USB a chaque
+recompilation et demarer un PC pour tester mais ce workflow ne permet pas
+d'iterer rapidement. Le processus prendrait plusieures minutes dans le
+meilleure des cas et il serait impossible de debugger l'OS avec un debugger.
+
+Avec une machine virtuelle par contre une seule commande suffit pour recompiler
+et redemarrer l'OS tres rapidement.
+On a donc choisie d'utiliser QEMU pour simuler un PC avec un cpu x86 32 bits
+
+TODO: terminer
+
+# Programmer un processeur x86
+
+Un OS fournit une abstraction des composants materielles et leurs specificitees.
+L'un des ces composants a abstraire est le CPU. Un CPU fonctionne differement
+selon son architecture et son design un CPU x86 ne fonctionne pas comme un
+CPU RISC-V, qui lui ne fonctionne pas comme qu'un CPU Motorolla 68k.
+
+Pour programmer cette abstraction correctement il faut comprendre son
+fonctionnement.
+
+Comment fonctionne un CPU x86 ?
+
+## Mode d'operation
+
+- **Real mode**
+
+    > C'est le mode par defaut du CPU quand le systeme s'allume ou se reset.
+    > Il simule l'execution d'un CPU 8086 16 bits. Son nom vient du fait que
+    > dans ce mode toutes les addresse memoires correspondent aux vraies
+    > addresse physiques, il n'y a aucune protection de la memoire.
+    > Dans ce mode nous avons access a toutes les interruptions de l'IVT
+    > configuree par le BIOS et 1MB de RAM.
+
+- **Protected mode**
+
+    > Ce mode passe le CPU en execution 32 bits. "Protected" parce que des
+    > moyens de protection de la memoire sont mis en place : organization
+    > des segments et restriction d'access par privilege avec la GDT,
+    > memoire virtuelle et pagination.
+    > Comme les registres font maintenant 32 bits et chaque processus
+    > peut avoir 4GB de memoire virtuelle.
+    > Pour activer ce mode il faut mettre le bit PE du registres CR0 a 1
+    > initialiser la gdt et desactiver les interruptions temporairement.
+    > ```asm
+    >    cli            ; desactiver les interruptions
+    >    lgdt [gdtr]    ; charger la GDT
+    >    mov eax, cr0
+    >    or al, 1       ; activer le bit PE
+    >    mov cr0, eax
+    >```
+
+- **Long mode**
+
+    > Ce mode ressemble beaucoup au mode protege mais certaines fonctionalitees
+    > comme la segmentation sont completement desactives en faveur de la
+    > pagination et la memoire virtuelle. De plus les registres generaux sont
+    > etendus a 64 bits et 8 nouveaux registres d'entiers et de vecteurs sont
+    > ajoutes (R8-R15, XMM8-XMM15). Les physiques addresses utilisent 40 bits,
+    > et les addresses virtuelles 48. Pour passer en long mode il faut avoir
+    > configure la memoire virtuelle au prealable.
+
+Nous avons choisi d'utiliser le mode protege parce qu'il nous donne access au
+plus de fonctionalites sans avoir a configurer des structures de donnees
+complexes que l'on ne peut pas encore tester sans OS.
+Cependant si on continue l'OS il serait judicieux de passer en long mode rapidement
+et de se debarasser du code 32 bits parce que intel a annonce en en 2023 que
+d'ici 2025 ils ne produiront plus de CPUs 32-bits et donc le mode protege
+deviendra obsolete bientot apres.
+
+Cette decision implique qu'il faudra utiliser un cross-compiler pour compiler du
+code 32bits sur notre machine.
 
 # Firmware carte mere
 
@@ -122,35 +198,49 @@ et l'executer avant d'atteindre la limite.
 
 ## Stage 2
 
-Pour lire a partir d'un disque dans en "real mode" il faut utiliser l'API
+Pour charger le stage 2 de notre bootloader il faut pouvoir lire le programme
+sur le disque et le charger en memoire.
+
+Pour lire a partir d'un disque en "real mode" il faut utiliser l'API
 fournie par le BIOS. Cette API est une table de fonctions, plus precisement
 elle s'appelle l'IVT (Interrupt vector table). C'est une structure de donnees
-propre au "real mode".
+propre au "real mode" qui est liée au CPU directement par le mechnisme
+d'interruptions.
 
 Chaque entree fais 4 octets:
 
-+-----------+------------+------+
-|  Segment  |  Offset    | Data |
-+===========+============+======+
-|32         |16          | Bits |
-+-----------+------------+------+
++-----------+------------+---+
+|  Offset   |  Segment   |   |
++===========+============+===+
+|0          |16          | 32|
++-----------+------------+---+
 
+> Segment un selecteur de segment memoire et offset le decalage dans ce segment
 
+La table a 256 entrees et fait donc 1024 octets. Elle se situe a l'addresse 0x0,
+oui l'addresse NULL est enfaite une addresse valide, celle de l'IVT en
+l'occurrence.
+
+Pour appeler une fonction dans cette table il faut simuler une interruption
+avec l'instruction `int` mnemonic pour "interrupt". Par exemple `int 0x08` vas
+simuler l'interruption 8 et le CPU vas alors chercher la fonction a l'offset 8
+dans la table (index 7) et l'executer.\
+En fonction des valeures dans le registres genereaux le fonctions vont changer
+de comportement. Les registres sont alors les parametres des fonctions.
+
+La reference pour savoir se servir des ces fonctions est le
+[Ralph's brown interrupt list](https://www.cs.cmu.edu/~ralf/files.html).
+
+Apres avoir essaye pendant quelques jours nous avons decides de ne pas faire notre
+propre bootloader pour pouvoir aller plus loin dans le development de l'OS et
+ne pas passer 4 semaines a ecrire un bootloader.
 
 ## Multiboot
 
-# Programmer un processeur x86
-## Mode d'operation cpu
-- Real mode
-    Ce mode est le mode par defaut de CPU quand le systeme s'allume ou se reset. Il est cense simuler
-    l'execution d'un CPU 8086. Dans ce mode nous avons access a toutes les interruptions
-- protected mode
-- long mode
-## Gestion de la memoire
-- Rien
-- Segmentation
-- Paging
-### Mode d'operation vs gestion de la memoire
+Le standard multiboot permet a un kernel de communiquer avec un bootloader
+multiboot par une structure de donnees standard.
+
+TODO: terminer
 
 ## IO en x86
 
