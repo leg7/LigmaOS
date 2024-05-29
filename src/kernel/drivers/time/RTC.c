@@ -10,7 +10,7 @@ how the chip works */
 #define DATE_Y 5
 #define OFFSET 16
 
-#define TIME_X 1024 - 200
+#define TIME_X 1024 - 16*8-5
 #define TIME_Y 5
 
 enum : u8
@@ -190,14 +190,53 @@ void RTC_IRQ_8_handler(struct ISR_parameters const *p)
 {
 	u16 x = TIME_X;
 	u16 const y = TIME_Y;
+    
 	enum VBE_basic_color const color = FUCHSIA;
-	unsigned_print(RTC_TIME.hours_24, &x, y, color);
+    
+	if (RTC_TIME.hours_24==0){
+        unsigned_print(RTC_TIME.hours_24, &x, y, color);
+        unsigned_print(RTC_TIME.hours_24, &x, y, color);
+    }
+    else if (RTC_TIME.hours_24<10){
+        VBE_put_char_2x('0', x, y, color);
+        x+=OFFSET;
+        unsigned_print(RTC_TIME.hours_24, &x, y, color);
+    }
+    else {
+        unsigned_print(RTC_TIME.hours_24, &x, y, color);
+    }
+    
 	VBE_put_char_2x(':', x, y, color);
 	x += OFFSET;
-	unsigned_print(RTC_TIME.minutes, &x, y, color);
+    
+    if (RTC_TIME.minutes==0){
+        unsigned_print(RTC_TIME.minutes, &x, y, color);
+        unsigned_print(RTC_TIME.minutes, &x, y, color);
+    }
+    else if (RTC_TIME.minutes<10){
+        VBE_put_char_2x('0', x, y, color);
+        x+=OFFSET;
+        unsigned_print(RTC_TIME.minutes, &x, y, color);
+    }
+    else {
+        unsigned_print(RTC_TIME.minutes, &x, y, color);
+    }
+    
 	VBE_put_char_2x(':', x, y, color);
 	x += OFFSET;
-	unsigned_print(RTC_TIME.seconds, &x, y, color);
+    
+    if (RTC_TIME.seconds==0){
+        unsigned_print(RTC_TIME.seconds, &x, y, color);
+        unsigned_print(RTC_TIME.seconds, &x, y, color);
+    }
+    else if (RTC_TIME.seconds<10){
+        VBE_put_char_2x('0', x, y, color);
+        x+=OFFSET;
+        unsigned_print(RTC_TIME.seconds, &x, y, color);
+    }
+    else {
+        unsigned_print(RTC_TIME.seconds, &x, y, color);
+    }
 }
 
 	acknowledge_interrupt();

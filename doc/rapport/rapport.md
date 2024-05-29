@@ -11,13 +11,13 @@ geometry: margin=3cm
 L'**OS** (correspondant à _Operating System_ en anglais ou _Système
 d'exploitation_ en français) est simplement un logiciel informatique bas niveau
 qui permet à l'utilisateur d'**exploiter** l'ensemble des composants qui
-constituent un ordinateur d'une manière conviviale et pratique, un example
+constituent un ordinateur d'une manière simple et pratique, un example
 d'**OS** qui est plus convivial (_User Friendly_) serait **Windows** et par
 l'opposé un **OS** qui serait plus pratique serait **Linux**.
 
 Un **OS** implique une interface entre l'utilisateur et l'ordinateur, une
 gestion de la mémoire, une communication entre le procésseur et les
-péripheriques de l'ordinateur (example: _GPU_) et la gestion de
+péripheriques de l'ordinateur (example: _GPU_) et la gestion des
 procéssus (example: _Multitasking_).
 
 ![](./os.png)
@@ -432,51 +432,147 @@ halt_message:
 
 Pour un OS classique l'affichage le plus efficace se fait à l'aide d'un ou des
 _drivers_ qui communiquent avec la carte graphique, en effet c'est la manière
-dont la plupart des **OS** fonctionnent **Mais** ceci est une taĉhe impossible
-dans notre contexte puisqu'il faudrait écrire un driver pour chaque carte graphique
-(la plupart étant faites par _Nvidia_) qui sont propriétaires et donc nous avons
-pas accès à leur code source.
+dont la plupart des OS fonctionnent **Mais** ceci est une taĉhe impossible
+dans notre contexte puisqu'il faudrait écrire un driver pour chaque carte graphique, la plupart étant propriétaires, nous n'avons pas accès à leur code source.
 
 Donc nous avons décidé d'utiliser des protocoles standard dans le BIOS comme
 **VGA**(_Video Graphics Array_) et **VESA**(_Video Electronics Standards
-Association_) configurés par les interruptions de notre _Bootloader_.
+Association_) configurés par les interruptions de notre _Bootloader_,.
 
-Pour avoir un mode graphique on utilise le _multiboot_header_, lorque
+Pour avoir un mode graphique on utilise le _multiboot_header_, lorsque
 _mode_type_ est à 0, _Multiboot_ nous donne accès à un mode graphique linèaire
 sinon si _mode_type_ est à 1 on obtient un mode graphique texte standard.
 
 Pour définir la résolution on utilise _width_ et _height_, lorsqu'on est en
 mode texte ces deux valeurs vont représenter le nombre de colonnes et lignes
 réspectivement, avec une unité representant un caractère, en revanche, lorsqu'on
-est en mode linéaire, _width_ et _height_ seront en **pixels**.
+est en mode linéaire, _width_ et _height_ seront représentés en **pixels**.
+
+En revanche, le mode demendé (résolution, texte ou linéaire etc.) n'est pas toujours celui qui est fourni par _multiboot_, c'est pour cela qu'il faut vérifier les données de _multiboot_info_ peu importe le mode graphique choisi.
+
+```C
+struct [[gnu::packed]] multiboot_info
+{   .
+	.
+	.
+	.
+	struct [[gnu::packed]] {
+		u64 address;
+		u32 pitch;
+		u32 width;
+		u32 height;
+		u8 bpp; // bits per pixel
+		u8 type;
+	} framebuffer;
+	.
+	.
+	.
+};
+```
 
 ## Affichage
 
 ### VGA Text Mode
 
-C'est le mode graphique par défaut fourni par _Multiboot_
+C'est le mode graphique par défaut, fourni par _Multiboot_,
 même si _mode_type_ du _multiboot_header_ n'est pas défini.
 
-Dans ce mode l'adresse du _framebuffer_ (standard)  sera `0xb8000`, ceci est
+Dans ce mode l'adresse du _framebuffer_ (standard)  sera `0xb8000`, c'est
 l'adresse à laquelle nous allons écrire des caractères pour les afficher à
 l'écran.
 
 
-Pour représenter des caractères nous utilisons des valeurs 16 bit où les
-premiers 8 bits vont représenter le caractère lui-même en ASCII, les prochains
-4 bits: la couleur du caractère (16 couleurs standard) et les derniers
-4 bits : la couleur du fond (16 couleurs standard), la représentation peut
-varier selon les différents "sous-modes" de _VGA textmode_.
+Pour représenter des caractères nous utilisons deux octets (_uint_8_) où le
+premier octet représente le caractère lui-même en ASCII et pour le deuxième octet, les premiers 4 bits: la couleur du caractère (16 couleurs standard) et les derniers
+4 bits : la couleur du fond du caractère (16 couleurs standard).
 
-+-----------------+------------------+
-| Attribute       |Character         |
-+=================+==================+
-| 7 6 5 4 3 2 1 0 | 7 6 5 4 3 2 1 0  |
-+-----------------+------------------+
+La représentation peut varier selon les différents "sous-modes" de _VGA textmode_.
+
++-----------------+-----------------------------------------------+-----------------------------+
+|                 |Attribute                                      |Character                    |
++-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+--+--+-----+-----+-----+-----+
+|  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |  7  |  6  |  5  |  4  |  3  |  2  |  1  |  0  |
++-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
+|Background color       |Foreground color                         |Code point                   |
++-----------------------+-----------------------------------------+-----------------------------+
+
+Pour écrire au _framebuffer_ en mode texte, on écrit les 2 octets du carcatère à son adresse (le _Code point_ en premier) avec le décalage nécessaire.
+
+Le début du _framebuffer_ représente le début de l'écran (en haut à gauche) et parcourt ligne par ligne (de gauche à  droite) l'écran, donc **ce mode est linéaire aussi!**, pour écrire à une coordonée (x,y) on utilisera cette formule (à l'aide des données de _multiboot_info.framebuffer_):
+```C
+void VGA_text_mode_plot_char(u8 x, u8 y, u8 character, u8 attribute) {
+    if ( ( x <= width ) && ( y <= height ) ){
+        unsigned short offset = y * pitch + x * 2; 
+        unsigned char far* video_memory = (unsigned char far*)0xb8000;
+
+        video_memory[offset] = character;
+        video_memory[offset + 1] = attribute;
+    }
+}
+```
+Ici, _pitch_ représente le nombre d'octets par ligne et donc **ce n'est pas la même chose que _width_!**,
+si on voulais utiliser width l'_offset_ se calculerait:
+```C
+unsigned short offset = (y * width + x) * 2;
+```
+On multiplie par 2 puisqu'un caractère est representé par 2 octets et le type du framebuffer est _unsigned char\*_.
 
 ### VESA VBE
+Ce mode nous permet d'écrire à l'écran des *pixels*, qui est beaucoup plus intéressant et qui est aussi le mode d'affichage principal de l'OS.
+
+Dans ce mode, l'adresse du _framebuffer_ n'est pas standard mais on peut la retrouver dans _multi_boot_info.framebuffer_.
+
+Pour ce mode nous avons accés aussi à une autre structure dédiée qui contient des informations potentiellement utiles:
+
+```C
+    struct [[gnu::packed]] multiboot_info 
+    {   .
+        .
+        .
+        .
+        struct [[gnu::packed]] {
+            u32 control_info;
+            u32 mode_info;
+            u16 mode;
+            u16 interface_seg;
+            u16 interface_off;
+            u16 interface_length;
+        } vbe;
+        .
+        .
+        .
+    }
+```
+
+La valeur d'un _pixel_ est tout simplement sa couleur, elle est representé dans notre "sous-mode" choisi par une valeur _hex_ de 32 bits sous la forme `0x00RRGGBB`, mais cette valeur peut être aussi en 24 bits (`0xRRGGBB`) parmi d'autres, **on peut avoir jusqu'à 16 777 215 couleurs différentes !**
+
+**Remarque**: Pendant le développement de la partie graphique _VBE_, on voudrait savoir si le "sous-mode" _VBE_ demendé est celui fourni, mais on ne peut pas l'afficher sans avoir déja fait la partie graphique donc cela crée une difficulté.
+
+Pour mettre un pixel à l'écran le méthode est quasiment la même que pour _VGA text mode_:
+```C
+void VESA_VBE_plot_pixel_32bpp(u16 x, u16 y ,u32 pixel){
+    if ( ( x >= width ) && ( y >= length) ){
+        unsigned short offset = pitch * y + x * (bpp/8); 
+        unsigned char far* video_memory = address;
+
+        video_memory[offset] = pixel;
+    }
+}
+```
+Ici _bpp_ est le nombre de bits par pixels, dans notre "sous-mode" VBE cette valeur est 32 donc on doit aller de 4 en 4 octets dans l'adresse du framebuffer d'où la division par 8.
 
 ##  Interface
+
+Le choix de l'interface est plus subjective que le reste du dévelopement de l'OS,
+notre interface utilise surtout les fonctionnalités de l'OS que nous avons reussi à implémenter comme le son, l'horloge et affichage graphique, elle ouvre sur un menu qui donne accès à 3 commandes possibles : "Text input", "Display image" et "Piano" où il ya aussi la date et l'heure qui s'affichent.
+
+- "Text input" affiche un "terminal" ou on peut écrire du texte, le supprimmer et lorsque le "terminal" est rempli, on peut continuer à écrire puisque le texte va monter automatiquement, en revanche on ne peut pas récupérer le texte perdu (triste).La police utilisé est une _bitmap_ dans un fichier C retrouvé sur internet (ayant une licence libre).
+
+- "Display image" affichera une image (libre de droits) qui utilise aussi une _bitmap_ C genérée par un logiciel. 
+
+- "Piano" mettra un piano digital où on peut jouer 12 notes différentes (allant de _do4_ à _si4_ pour les musiciens).
+
+En effet, on a du utiliser des fichiers C contenant des _bitmap_ pour avoir une écriture et image à l'écran puisque nous avons pas réussi à implanter un système de fichiers dans le temps réparti.
 
 # IO en x86
 
@@ -509,10 +605,45 @@ Cette collection de controlleurs externes au CPU s'appelle le chipset.
 ### IO ports
 ### MMIO
 ### DMA
-
 ### Etude de cas: Gestion d'un clavier PS2
 ### Polling vs interruptions
 ### IDT
 ### GDT
 ### Driver 8042
 ### Driver 8259A
+# Conclusion
+L'OS est composé de differentes parties qui peuvent être considérées comme domaines de programmation par elles-mêmes, comme par example le système de fichiers, le développement graphique, le kernel ou même la gestion des procéssus.
+
+Nous, nous avons choisi de faire des vérsions basiques des parties que nous avons implementés pour respecter le sujet, mais cela à crée une difficulté puisqu'on devait changer souvent de "thème" au milieu du projet.
+
+D'autres difficultés rencontrées étaient:
+
+
+- Le manque de documentation et ressources sur le développement d'un OS (par rapport à d'autres domaines de la programmation).
+- le déboggage difficile, comme par example pour le driver _PS2_ et l'affichage _VBE_.
+- l'organisation du temps par rapport aux tâches (certaines tâches s'averent plus difficile qu'on ne le pensait)
+
+Mais ces difficultés nous ont permit d'évoluer des compétences liées à l'informatique, comme:
+
+
+- Savoir lire la documentation officielle et s'aider des ressources sur internet.
+- Comprendre le bas niveau et le fonctionnement de la machine.
+- pouvoir écrire de l'_assembleur_ et comprendre son lien avec le langage _C_.
+- débogger sans avoir accès à un déboggeur moderne et en partie sans affichage.
+
+
+Aussi des compétences liées au travail:
+
+
+- Savoir s'organiser
+- Apprendre à travailler en équipe et se partager les tâches
+- Gérer le temps réparti et faire le mieux de celui-ci
+
+
+
+**_"Hey now, you're an all star, Get your game on, go play"_            -Shrek**
+
+
+
+
+
