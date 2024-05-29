@@ -194,6 +194,7 @@ static inline void VBE_delete_header_text(void)
 
 static inline void VBE_initialize_main_window(void)
 {
+    
 	VBE_put_banner();
 	VBE_put_terminal(SILVER);
 	VBE_switch_menu_window();
@@ -213,7 +214,7 @@ void VBE_switch_menu_window(void)
     VBE_put_string_terminal(" Play piano: CTRL+P");
     VBE_set_newline();
     VBE_set_newline();
-    VBE_put_string_terminal(" Display muystery image: CTRL+I");
+    VBE_put_string_terminal(" Display mystery image: CTRL+I");
     VBE_set_newline();
     VBE_set_newline();
     VBE_put_string_terminal(" Text input: CTRL+T");
@@ -225,7 +226,7 @@ void VBE_switch_text_input_window(void)
     current_window=TEXT_INPUT_WINDOW;
     VBE_delete_terminal_text();
     VBE_delete_header_text();
-    VBE_put_header_text(" Text Input",LIME);
+    VBE_put_header_text(" Text Input (Ctrl+Q : quit)",LIME);
     char_color=FUCHSIA;
     cursor_x=TEXT_START_X;
     cursor_y=TEXT_START_Y;
