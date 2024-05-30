@@ -3,7 +3,8 @@ colorlinks: true
 title: Rapport de stage OS 2024
 author: Daniel Cojucari, Leonard Gomez
 output: pdf_document
-geometry: margin=3cm
+geometry: margin=3.5cm
+toc: true
 ---
 
 # Introduction
@@ -28,6 +29,9 @@ interface graphique, gestion de la mémoire, et un système de fichiers,
 mais le temps limité et les enjeux de ces tâches ont fait évoluer
 notre objectif dans le développement de  l'**OS**.
 
+Certaines parties du développement de l'OS ont été omises ou abrégées pour
+rendre le rapport plus facile à lire et moins long.
+
 # Environnement de développement
 
 Pour tester notre OS on pourrait flasher l'ISO sur une clef USB à chaque
@@ -38,7 +42,17 @@ De plus il serait impossible de debugger l'OS avec GDB.
 
 Avec une machine virtuelle par contre une seule commande suffit pour recompiler
 et redémarrer l'OS très rapidement.
-On a donc choisi d'utiliser QEMU pour simuler un PC avec un cpu x86 32 bits.
+On a donc choisi d'utiliser QEMU pour simuler un PC avec un CPU x86 32 bits.
+
+Pour rendre le build reproductible on a choisi d'utiliser Nix et GNU Make.
+
+Nix est un langage fonctionnel pour configurer des systèmes Unix. Grâce à Nix,
+on peut créer un environnement shell avec toutes les bonnes dépendances sur
+n'importe quelle distribution Linux ou macOS.
+
+La compilation sera faite en mode "freestanding" parce que les implémentations
+de libc dépendent de l'OS; sur Linux, le libc dépend des syscalls Linux. Il
+faudra donc réimplémenter un libc ou porter un libc existant à notre OS.
 
 # Programmer un processeur x86
 
@@ -96,10 +110,10 @@ plus de fonctionnalités sans avoir à configurer des structures de données
 complexes que l'on ne peut pas encore tester sans OS.\
 De plus, en mode 32 bits, on peut compiler et exécuter un programme C. Je ne pense
 pas que les compilateurs modernes puissent générer du code 16 bits.\
-Cependant, si l'on continue le développement de l'OS, il serait judicieux de passer en long mode rapidement
-et de se débarrasser du code 32 bits car Intel a annoncé en 2023 que
-d'ici 2025, ils ne produiront plus de CPUs 32-bits et donc le mode protégé
-deviendra bientôt obsolète.
+Cependant, si l'on continue le développement de l'OS, il serait judicieux de
+passer en long mode rapidement et de se débarrasser du code 32 bits car Intel a
+annoncé en 2023 que d'ici 2025, ils ne produiront plus de CPUs 32-bits et par
+consequent le mode protégé deviendra bientôt obsolète.
 
 Cette décision implique qu'il faudra utiliser un cross-compiler pour compiler du
 code 32 bits sur notre machine.
@@ -303,7 +317,7 @@ système et quelles informations envoyer en réponse.
                                 MULTIBOOT_HEADER_FLAG_VIDEO_MODE |\
                                 AOUT_KLUDGE
 
-// [[gun::packed]] est un pragma pour informer le compilateur qu'il
+// [[gnu::packed]] est un pragma pour informer le compilateur qu'il
 // ne faut pas rajouter de "padding" a ce struct pour l'aligner en memoire
 // ce pragma est utilise tres souvent en OS dev parce que les structures
 // imposees doivent imperativement correspondre aux specifications
@@ -428,14 +442,16 @@ halt_message:
 	.asciz "Halted."
 ```
 
-# Graphiques
+# Graphismes
 
 Pour un OS classique l'affichage le plus efficace se fait à l'aide d'un ou des
 _drivers_ qui communiquent avec la carte graphique, en effet c'est la manière
 dont la plupart des OS fonctionnent **Mais** ceci est une taĉhe impossible
-dans notre contexte puisqu'il faudrait écrire un driver pour chaque carte graphique, la plupart étant propriétaires, nous n'avons pas accès à leur code source.
+dans notre contexte puisqu'il faudrait écrire un driver pour chaque carte
+graphique, la plupart étant propriétaires, nous n'avons pas accès à leur code
+source.
 
-Donc nous avons décidé d'utiliser des protocoles standard dans le BIOS comme
+Donc nous avons décidé d'utiliser des protocoles standard du BIOS comme
 **VGA**(_Video Graphics Array_) et **VESA**(_Video Electronics Standards
 Association_) configurés par les interruptions de notre _Bootloader_,.
 
@@ -448,7 +464,9 @@ mode texte ces deux valeurs vont représenter le nombre de colonnes et lignes
 réspectivement, avec une unité representant un caractère, en revanche, lorsqu'on
 est en mode linéaire, _width_ et _height_ seront représentés en **pixels**.
 
-En revanche, le mode demendé (résolution, texte ou linéaire etc.) n'est pas toujours celui qui est fourni par _multiboot_, c'est pour cela qu'il faut vérifier les données de _multiboot_info_ peu importe le mode graphique choisi.
+En revanche, le mode demendé (résolution, texte ou linéaire etc.) n'est pas
+toujours celui qui est fourni par _multiboot_, c'est pour cela qu'il faut
+vérifier les données de _multiboot_info_ peu importe le mode graphique choisi.
 
 ```C
 struct [[gnu::packed]] multiboot_info
@@ -502,7 +520,7 @@ Le début du _framebuffer_ représente le début de l'écran (en haut à gauche)
 ```C
 void VGA_text_mode_plot_char(u8 x, u8 y, u8 character, u8 attribute) {
     if ( ( x <= width ) && ( y <= height ) ){
-        unsigned short offset = y * pitch + x * 2; 
+        unsigned short offset = y * pitch + x * 2;
         unsigned char far* video_memory = (unsigned char far*)0xb8000;
 
         video_memory[offset] = character;
@@ -525,7 +543,7 @@ Dans ce mode, l'adresse du _framebuffer_ n'est pas standard mais on peut la retr
 Pour ce mode nous avons accés aussi à une autre structure dédiée qui contient des informations potentiellement utiles:
 
 ```C
-    struct [[gnu::packed]] multiboot_info 
+    struct [[gnu::packed]] multiboot_info
     {   .
         .
         .
@@ -552,7 +570,7 @@ Pour mettre un pixel à l'écran le méthode est quasiment la même que pour _VG
 ```C
 void VESA_VBE_plot_pixel_32bpp(u16 x, u16 y ,u32 pixel){
     if ( ( x >= width ) && ( y >= length) ){
-        unsigned short offset = pitch * y + x * (bpp/8); 
+        unsigned short offset = pitch * y + x * (bpp/8);
         unsigned char far* video_memory = address;
 
         video_memory[offset] = pixel;
@@ -568,7 +586,7 @@ notre interface utilise surtout les fonctionnalités de l'OS que nous avons reus
 
 - "Text input" affiche un "terminal" ou on peut écrire du texte, le supprimmer et lorsque le "terminal" est rempli, on peut continuer à écrire puisque le texte va monter automatiquement, en revanche on ne peut pas récupérer le texte perdu (triste).La police utilisé est une _bitmap_ dans un fichier C retrouvé sur internet (ayant une licence libre).
 
-- "Display image" affichera une image (libre de droits) qui utilise aussi une _bitmap_ C genérée par un logiciel. 
+- "Display image" affichera une image (libre de droits) qui utilise aussi une _bitmap_ C genérée par un logiciel.
 
 - "Piano" mettra un piano digital où on peut jouer 12 notes différentes (allant de _do4_ à _si4_ pour les musiciens).
 
@@ -577,7 +595,7 @@ En effet, on a du utiliser des fichiers C contenant des _bitmap_ pour avoir une 
 # IO en x86
 
 C'est bien beau d'avoir un CPU qui peut effectuer des milliards d'opérations à
-la seconde mais sans moyen de communiquer avec, autant utiliser un boulier.
+la seconde, mais sans moyen de communiquer avec, autant utiliser un boulier.
 
 Comment est-ce que le CPU communique avec le monde externe ?
 
@@ -588,36 +606,498 @@ Comment est-ce que le CPU communique avec le monde externe ?
 > > Source : "Operating systems - Design and implementation"
 > > Andrew S. Tanenbaum et Albert S. Woodhull
 
-Le CPU communique rarement avec les peripheriques directement.
-Le CPU est rattache electriquement a pleins de controlleurs qui se chargent de
-gerer un type de peripherique. Par exemple le controlleur 8042 se charge de
-gerer les peripheriques PS2 (clavier, souris) et le PC speaker. Tandis que le
-controlleur USB s'occupe des peripheriques USB.
-Pour communiquer avec ces controlleurs les CPU utilise son bus.
+Le CPU communique rarement avec les périphériques directement. Le CPU est
+rattaché électriquement à plusieurs contrôleurs qui se chargent de gérer un type
+de périphérique. Par exemple, le contrôleur 8042 se charge de gérer les
+périphériques PS2 (clavier, souris) et le PC speaker. Tandis que le contrôleur
+USB s'occupe des périphériques USB. Pour communiquer avec ces contrôleurs, le
+CPU utilise son bus.
 
-Cette collection de controlleurs externes au CPU s'appelle le chipset.
+Cette collection de contrôleurs externes au CPU s'appelle le chipset.
 
+Comment envoyer un message au contrôleur ?
 
-### Chipset
-- Northbridge / Southbridge
-- SOC
+## IO ports
 
-### IO ports
-### MMIO
-### DMA
-### Etude de cas: Gestion d'un clavier PS2
-### Polling vs interruptions
-### IDT
-### GDT
+Le CPU a un espace d'adresses dédié au contrôle du bus. L'IO address space
+commence à `0` et va jusqu'à `2^16 - 1`. Ces adresses correspondent à un espace
+mémoire sur la carte mère qui joue un rôle de tampon entre le CPU et les
+contrôleurs.
+
+Les adresses des contrôleurs sont hardcodées par Intel. Par exemple, pour le
+contrôleur clavier/souris/PC-speaker 8042, le port de données est `0x60` et le
+port de commande est `0x64`.
+
+Il n'y a pas d'interface C pour accéder à ces ports, il faut alors passer par de
+l'assembleur. Pour lire des données du 8042, l'instruction serait
+
+```asm
+mov edx, 0x60
+in al, dx
+```
+
+Pour éviter de faire de l'assembleur, nous avons créé une interface C qui
+appelle ces fonctions assembleur. Il faudra déclarer les signatures des
+fonctions en C dans un header et les définir en assembleur.
+
+---
+
+> **Declaration C**
+
+```C
+#pragma once
+#include <library/types.h>
+
+typedef u16 IO_port_8;
+typedef u16 IO_port_16;
+typedef u16 IO_port_32;
+
+// le pragma cdecl indique au compilateur que ces fonctions gerent leur pile
+// elle memes
+[[gnu::cdecl]] void x86_32_out_8(const IO_port_8 port, const u8 data);
+[[gnu::cdecl]] void x86_32_out_16(const IO_port_16 port, const u16 data);
+[[gnu::cdecl]] void x86_32_out_32(const IO_port_32 port, const u32 data);
+[[gnu::cdecl]] u8   x86_32_in_8(const IO_port_8 port);
+[[gnu::cdecl]] u16  x86_32_in_16(const IO_port_16 port);
+[[gnu::cdecl]] u32  x86_32_in_32(const IO_port_32 port);
+[[gnu::cdecl]] void x86_panic(void);
+```
+
+---
+
+> **Definition assembeur**
+
+```asm
+[bits 32]
+global x86_32_out_8, x86_32_out_16, x86_32_out_32, x86_32_in_8, x86_32_in_16, x86_32_in_32
+
+section .text
+
+x86_32_out_8:
+	mov edx, [esp + 4]
+	mov eax, [esp + 8]
+	out dx, al
+	ret
+
+x86_32_out_16:
+	mov edx, [esp + 4]
+	mov eax, [esp + 8]
+	out dx, ax
+	ret
+
+x86_32_out_32:
+	mov edx, [esp + 4]
+	mov eax, [esp + 8]
+	out dx, eax
+	ret
+
+x86_32_in_8:
+	mov edx, [esp + 4]
+	in al, dx
+	ret
+
+x86_32_in_16:
+	mov edx, [esp + 4]
+	in ax, dx
+	ret
+
+x86_32_in_32:
+	mov edx, [esp + 4]
+	in eax, dx
+	ret
+
+global x86_panic
+x86_panic:
+	cli
+	hlt
+```
+
+---
+
+Le problème de ce moyen de communication est qu'il est très lent pour transférer
+de grandes quantités de données. On ne peut transférer qu'une unité par
+instruction (8 ou 32 bits selon le port) et ce transfert utilise du temps CPU.
+
+Le DMA est une solution à ce problème mais nous ne l'avons pas implémentée parce
+qu'elle devient vraiment importante pour communiquer avec le disque, quand le
+débit de données est très important, chose que nous n'avons pas faite.
+
+## Étude de cas : Gestion d'un clavier PS2
+
+![](ps2.jpg)
+
+Pour interagir avec un ordinateur, avoir un clavier est le strict minimum. Les
+utilisateurs VIM diraient même que c'est la meilleure manière d'utiliser un
+ordinateur.
+
+Le clavier PS2 ne peut pas communiquer directement avec le CPU, il doit passer
+par un contrôleur, le 8042 pour les chipsets x86. Il faudra donc programmer un
+driver pour le 8042.
+
 ### Driver 8042
-### Driver 8259A
-# Conclusion
-L'OS est composé de differentes parties qui peuvent être considérées comme domaines de programmation par elles-mêmes, comme par example le système de fichiers, le développement graphique, le kernel ou même la gestion des procéssus.
 
-Nous, nous avons choisi de faire des vérsions basiques des parties que nous avons implementés pour respecter le sujet, mais cela à crée une difficulté puisqu'on devait changer souvent de "thème" au milieu du projet.
+Je vous épargne les détails compliqués, l'idée est simple. Le 8042 est branché
+sur les IO ports `0x60` et `0x64`. Il faut alors consulter la fiche technique du
+8042 pour savoir comment communiquer avec via ses ports. Une fois le contrôleur
+initialisé comme indiqué dans le manuel, le clavier écrit des scancodes dans le
+data port du 8042 (`0x60`). On peut lire ces codes avec notre interface C.
+
+```C
+u8 scancode = x86_in_8(0x60);
+```
+
+On crée une interface pour lire les données que le contrôleur nous donne et puis le module est terminé.
+
+```C
+#pragma once
+
+u8 PS2_8042_data_read(void);
+void PS2_8042_initialize(void);
+```
+
+### Polling vs interruptions
+
+Pour lire les scancodes lorsque l'utilisateur utilise le clavier, il existe deux
+techniques:
+
+- Polling
+
+> > Le polling est une technique où l'on demande de manière répétée au contrôleur
+> > s'il a des nouvelles informations. Le polling peut être bloquant,
+> > c'est-à-dire qu'il bloque complètement le CPU pendant qu'il poll, ou non
+> > bloquant, où il demande à des intervalles de temps.
+> > [Cette scène](https://www.youtube.com/watch?v=pRsxDmxA9Qk) de Shrek 2 illustre
+> > parfaitement le concept.
+
+- Interruptions
+
+> > Les interruptions sont un mécanisme essentiel au fonctionnement d'un système
+> > x86. Cette fonctionnalité est intégrée électroniquement de manière très
+> > efficace. Les interruptions sont un concept simple. Quand le contrôleur a de
+> > nouvelles données à partager avec le CPU, il l'interrompt pour qu'il s'en
+> > occupe. Le CPU est tellement rapide qu'il donne l'illusion à l'utilisateur qu'il
+> > traite des tâches en parallèle.
+> >
+> > Nous avons opté pour les interruptions, bien qu'elles soient beaucoup plus
+> > difficiles à implémenter, car elles sont essentielles au fonctionnement d'un OS
+> > et bien plus efficaces que le polling en termes de temps CPU.
+
+### Driver PS2
+
+Le driver PS2 est un module distinct du 8042 car le contrôleur PS2 du système
+pourrait être une puce différente. Idéalement, nous devrions abstraire le
+contrôleur PS2 et utiliser une interface générique pour recevoir des scancodes.
+De cette manière, notre driver PS2 pourrait fonctionner avec n'importe quel
+contrôleur, rendant notre code plus générique. Nous avons choisi de ne pas
+utiliser cette technique ("hardware abstraction layer" HAL) par manque de temps.
+
+Un scancode est une suite d'octets qui identifie la touche appuyée ou relâchée.\
+Par exemple, si l'on appuie sur la touche que l'on interprète comme "contrôle
+gauche" sur un clavier ISO, le scancode émis est `0x14` et quand la touche est
+relâchée, le code prend deux octets : `0xFA 0x14`. \
+"Contrôle droit" appuyé serait `0xE0 0x14` et relâché `0xE0 0xFA 0x14`.
+
+Il est important de comprendre que ces scancodes servent uniquement à identifier
+les touches et non pas à leur donner une sémantique. Par exemple, dans une
+interprétation de clavier ANSI qwerty, le code `0x1C` correspond à la touche qui
+porte le label "a", mais dans une interprétation ISO azerty, ce code correspond
+à la touche qui porte le label "q".\ Ces codes représentent en fait les
+positions des touches.
+
+Cet encodage présente plusieurs problèmes.\
+Premièrement, pour savoir si une touche est appuyée, on ne sait pas combien
+d'octets il faut lire, soit 1 seule pour contrôle gauche ou jusqu'à 7 pour
+"pause" !.\
+Deuxièmement, le contrôleur n'envoie qu'un seul octet par interruption, ce qui
+fait qu'on perd le contexte de ce qu'on a lu précédemment à chaque interruption.
+Donc, si on reçoit une interruption clavier et on lit `0x14`, est-ce qu'on a
+reçu "contrôle gauche appuyé" ou bien est-ce que l'interruption précédente était
+`0xFA` et ce code correspond alors à "contrôle gauche relâché" (`0xFA 0x14`) ?\
+Ou est-ce que l'interruption précédente était en fait `0xE0` et on doit lire "contrôle droit appuyé" ?\
+Ou même encore est-ce que les deux dernières interruptions étaient `0xE0 0xFA`,
+ce qui correspond à "contrôle droit relâché" ?
+
+De plus, ces codes peuvent changer en fonction du "scancode set" que le clavier
+utilise. Il existe 3 sets différents. Le numéro 1 est considéré obsolète,
+presque tous les claviers supportent le 2 et le 3 est très peu utilisé. Nous
+avons choisi d'implémenter le "scancode set 2" uniquement.
+
+Pour pallier ce problème, il faut traduire ces codes en un nouvel encodage
+logique avec un automate fini déterministe. Notre nouvel encodage s'appelle le
+"keycode" et tient sur 1 octet.
+
+```C
+union keycode
+{
+	struct {
+		u8 row : 3;
+		u8 column : 5;
+	};
+	u8 code;
+};
+```
+
+Avec cet encodage, on peut représenter des positions sur un clavier qui a au
+maximum 7 rangées et 31 colonnes. Suffisant pour représenter toutes les touches
+d'un IBM Battleship!
+
+![](ibm-battleship.jpg)
+
+L'automate reglera le probleme de perte de contexte entre chaque interruption.
+Voici un diagramme de l'automate.
+
+```{.mermaid format=pdf}
+stateDiagram-v2
+    classDef final fill:#318CE7
+
+    INITIAL --> RELEASED : Released
+    INITIAL --> EXTENDED : Extended
+    INITIAL --> KEY_PRESSED : Scancode
+    INITIAL --> PAUSE_PRESSED : Pause
+
+    RELEASED --> KEY_RELEASED : Scancode
+
+    KEY_RELEASED --> INITIAL
+    KEY_PRESSED -->  INITIAL
+
+    PAUSE_PRESSED --> KEY_PRESSED
+
+    EXTENDED --> EXTENDED_RELEASED : Released
+    EXTENDED --> KEY_PRESSED : Scancode_extended
+    EXTENDED --> EXTENDED_PRINT_1 : Print_screen_1
+
+    EXTENDED_PRINT_1 --> EXTENDED_PRINT_2 : Extended
+    EXTENDED_PRINT_2 --> KEY_PRESSED : Print_screen_2
+
+    EXTENDED_RELEASED --> KEY_RELEASED : Released
+    EXTENDED_RELEASED --> EXTENDED_RELEASED_PRINT_1 : Print_screen_1
+    EXTENDED_RELEASED_PRINT_1 --> EXTENDED_RELEASED_PRINT_2 : Extend
+    EXTENDED_RELEASED_PRINT_2 --> EXTENDED_RELEASED_PRINT_3 : Released
+    EXTENDED_RELEASED_PRINT_3 --> KEY_RELEASED : Print_screen_2
+
+    class KEY_PRESSED, KEY_RELEASED final
+```
+
+Les transitions sans labels sont gérées dans le contrôle du flux de l'interruption
+clavier. (Voir code)
+
+Maintenant, chaque interruption clavier est un pas dans l'automate.
+On peut savoir où l'on en est à n'importe quel moment et effectuer la bonne
+traduction en keycode. Pour savoir quelles touches sont actives à un instant T,
+on crée un tableau de booléens indexé par les keycodes et on le met à jour dans
+les états bleus.
+
+```C
+keycode azerty_a = { .row = 3, .col = 2 }
+bool a_is_pressed = KEY_IS_PRESSED[azerty_a.code];
+```
+
+Il ne reste plus qu'à associer une sémantique aux keycodes. Cela se fait
+facilement grâce à une table de traduction `keycode_to_key`.
+
+```C
+constexpr enum key const keycode_to_key[KEYMAP_ROWS][KEYMAP_COLUMNS] = {
+	{ KEY_ESCAPE, KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6, KEY_F7, KEY_F8,   ... },
+
+	{ KEY_BACKTICK, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9,  ... },
+
+	{ KEY_TAB, KEY_Q, KEY_W, KEY_E, KEY_R, KEY_T, KEY_Y, KEY_U, KEY_I, KEY_O,       ... },
+
+	{ KEY_CAPS_LOCK, KEY_A, KEY_S, KEY_D, KEY_F, KEY_G, KEY_H, KEY_J, KEY_K, KEY_L, ... },
+
+	{ KEY_LEFT_SHIFT, KEY_Z, KEY_X, KEY_C, KEY_V, KEY_B, KEY_N, KEY_M, KEY_COMMA,   ... },
+
+	{ KEY_LEFT_CONTROL, KEY_LEFT_GUI, KEY_LEFT_ALT, KEY_SPACE, KEY_RIGHT_ALT,       ... },
+};
+```
+
+Une fois tout cela fait, il faut configurer le CPU correctement pour qu'il
+appelle notre fonction de transition à chaque interruption clavier. Comment
+faire ?
+
+### IDT
+
+Un CPU x86 peut gérer 256 interruptions différentes. Comment est-ce que l'on
+peut configurer ce que le CPU fait pour chaque interruption ?
+
+Le CPU a une table qui s'appelle l'IDT (Interrupt Descriptor Table). Cette table
+est très similaire à l'IVT du mode réel. L'IVT du mode réel était la table des
+handlers d'interruptions fournie par le BIOS comme API pour les composants.\
+Lorsque l'on passe en mode 32 bits, on doit utiliser l'IDT.
+
+Quand le CPU reçoit une interruption N, il va lire l'entrée à l'offset N dans
+l'IDT, vérifier des bits de permissions, et sauter à l'adresse du handler
+configuré dans l'entrée. Avec ce mécanisme, on peut faire une fonction pour
+chaque interruption et les enregistrer dans l'IDT.
+
+Un handler d'interruptions s'appelle une "Interrupt Service Routine" (ISR).
+
+---
+
+![](idt-1.png)
+
+---
+
+Cette approche est simple mais le problème est que l'on doit programmer chaque
+ISR en assembleur parce qu'il faut sauvegarder l'état du CPU pour pouvoir y
+revenir une fois l'interruption traitée.
+
+Nous avions choisi d'implémenter les interruptions en assembleur, mais avons
+vite changé d'avis et changé de méthode.
+
+La méthode la plus utilisée pour programmer les ISR en C est la suivante:
+
+1. Chaque ISR appelle la fonction assembleur commune en lui passant son numéro
+   d'interruption en paramètre.
+2. La fonction commune assembleur va:
+    1. Sauvegarder l'état du CPU dans son prologue.
+    2. Appeler le dispatcher C en lui passant le numéro de l'interruption à
+       traiter, qui va vérifier s'il existe un handler pour l'interruption en C
+    et l'appeler sinon afficher un message d'erreur.
+    3. Restaurer l'état du CPU dans l'épilogue.
+
+---
+
+![](idt-2.png)
+
+---
+
+De cette manière on peut facilement ajouter et changer les handlers
+d'interruptions depuis notre code C. Le seul bémol est que l'on passe par 4
+niveaux d'indirection par rapport à un seul avec la méthode assembleur. Spoiler
+alert ! cette structure va passer à 5 niveaux d'indirection par la suite. Sans
+compter l'accès à la table GDT pour trouver l'ISR en mémoire.
+
+Tout ceci est aberrant d'un point de vue performance. Ce genre de machine de
+Rube Goldberg est à éviter au maximum quand une solution plus simple est
+disponible. Si vous voulez en apprendre plus sur les dégradations en performance
+qu'un système comme celui-ci implique, je recommande
+[cette article/vidéo](https://www.computerenhance.com/p/clean-code-horrible-performance).
+Malheureusement nous n'avons pas le temps d'implémenter une meilleure solution
+par manque de temps.
+
+### GDT
+
+Nous allons aborder le GDT très rapidement pour nous concentrer sur le clavier.
+
+En mode 16 bits les CPUs pouvaient adresser `2^16 - 1` octets de mémoire avec un
+registre, ce qui équivaut à 64K. Ça fait vraiment pas beaucoup. Les légendes
+racontent que Bill Gates a dit en 1981 que 640K de mémoire devrait être
+suffisant pour quiconque. La citation est probablement fausse mais elle montre
+bien que 64K ne suffisait même pas à l'époque, et encore moins aujourd'hui où un
+"Hello World" en Node.js utilise 500M de RAM, soit 7812 fois plus... La solution
+proposée par Intel était de diviser la mémoire en segments. Pour adresser la
+mémoire on utilise alors la syntaxe `segment:offset` où segment est un registre
+de segment de 4 bits et offset un registre général de 16 bits. Cette technique
+permet d'adresser 1M de RAM.
+
+En mode 32 bits, Intel propose le GDT (General Descriptor Table). C'est une
+table qui a pour but d'organiser les sélecteurs de segments que le programmeur
+utilise. Le programmeur peut alors choisir un segment pour la pile de l'OS qui
+nécessite un privilège administrateur et un segment pour les codes des
+utilisateurs non privilégiés par exemple.
+
+La segmentation mémoire est largement obsolète et ne fonctionne pas en mode 64
+bits, donc nous n'allons pas l'utiliser. Par contre, l'IDT en a besoin pour
+accéder aux ISR pour des raisons de rétrocompatibilité.
+
+### Driver PIC 8259A
+
+Une fois que l'IDT fonctionne, il va falloir programmer le contrôleur
+d'interruptions pour qu'il envoie le bon numéro d'interruption au CPU de manière
+à ce que le bon ISR soit appelé.
+
+Dans un chipset x86, toutes les interruptions hardware passent par le PIC
+(Programmable Interrupt Controller) avant de passer par le CPU. Le PIC s'occupe
+de sérialiser les interruptions hardware.
+
+Par défaut, le PIC est configuré par le BIOS pour un PC IBM.
+
+![](irq.png)
+
+Problème, problème. Intel réserve les 31 premières interruptions pour les
+exceptions logicielles telles que la division par 0. Donc, il faut remapper les
+interruptions matérielles dans la plage 31-47.
+
+Il faut lire le manuel du contrôleur et le configurer via ses ports d'E/S.
+
+Une fois le PIC reprogramme il faut ajouter un mechanisme pour gerer les
+interruptions hardware a l'IDT
+
+---
+
+![](idt-3.png)
+
+---
+
+### Driver PIT 8254
+
+Le PIT (Programmable Interrupt Timer) 8254 est un contrôleur pour 3 oscillateurs
+qui servent de timer pour le système. Le timer 3 est directement connecté au
+PC-SPEAKER, et permet de jouer des fréquences normalement impossibles grâce à
+une technique appelée "pulse width modulation".
+
+Voici une explication provenant du wiki osdev:
+
+> Le haut-parleur lui-même a deux positions possibles, "in" et "out". Cette
+> position peut être définie via le bit 1 du port 0x61 sur le contrôleur de
+> clavier. Si ce bit est défini (=1), le haut-parleur se déplacera vers la
+> position "out", s'il est effacé (=0), alors le haut-parleur se déplacera vers la
+> position "in". En se déplaçant à l'intérieur et à l'extérieur de manière
+> répétée, des tons audibles sont produits si la vitesse de répétition (la
+> fréquence) est dans la plage que le haut-parleur peut reproduire et que
+> l'oreille humaine peut entendre. De plus, un seul mouvement vers l'intérieur ou
+> vers l'extérieur produit un son de clic car il est si rapide. Ainsi, une
+> fréquence trop basse pour être entendue comme un ton peut être perçue comme un
+> bruit secoué ou bourdonnant. (En fait, toute fréquence produite par ce système
+> produit également des fréquences plus élevées; recherchez "harmoniques de l'onde
+> carrée" si cela vous intéresse.)
+>
+> En l'absence d'une véritable carte son, le haut-parleur du PC peut être utilisé
+> pour produire un son numérique de qualité médiocre. Comme mentionné
+> précédemment, le haut-parleur lui-même n'a que deux positions possibles, "en" et
+> "hors". Cependant, plus de positions sont nécessaires pour jouer un son
+> numérique. En général, 256 positions (8 bits) sont considérées comme adéquates
+> pour produire un audio compréhensible. Une méthode populaire utilisée par de
+> nombreux jeux vidéo sur PC pour contourner cette limitation s'appelle la
+> modulation de largeur d'impulsion. Cette technique utilise les propriétés
+> physiques du haut-parleur pour lui permettre de produire des sons (relativement)
+> complexes qui existent dans l'audio 8 bits.
+>
+> Le haut-parleur du PC prend environ 60 millionièmes de secondes pour changer de
+> position. Cela signifie que si la position du haut-parleur est changée de
+> "dedans" à "dehors" puis changée de nouveau en moins de 60 microsecondes, le
+> haut-parleur n'a pas eu suffisamment de temps pour atteindre complètement la
+> position "dehors". En ajustant précisément la durée pendant laquelle le
+> haut-parleur reste "dehors", la position du haut-parleur peut être réglée
+> n'importe où entre "dedans" et "dehors", permettant au haut-parleur de former
+> des sons plus complexes.
+
+C'est donc grâce à l'oscillateur que l'on va exploiter cette technique et
+produire les fréquences que l'on veut.
+
+### Driver RTC
+
+Le RTC (Real Time Clock) est un contrôleur qui donne accès au CMOS. Un chip
+mémoire alimenté par une batterie pour persister les données entre les reboots.
+Le CMOS contient plein de registres utilisés par le BIOS mais les seuls que l'on
+peut utiliser sans risquer de casser l'ordinateur sont les registres de date et
+heure. Le RTC contient également un oscillateur comme le PIT qui génère des
+interruptions. Le contrôleur s'en sert pour mettre l'heure à jour. Nous nous en
+servons pour mettre à jour l'affichage de l'heure.
+
+# Conclusion
+
+L'OS est composé de differentes parties qui peuvent être considérées comme
+domaines de programmation par elles-mêmes, comme par example le système de
+fichiers, le développement graphique, le kernel ou même la gestion des
+procéssus.
+
+Nous, nous avons choisi de faire des vérsions basiques des parties que nous
+avons implementés pour respecter le sujet, mais cela à crée une difficulté
+puisqu'on devait changer souvent de "thème" au milieu du projet.
 
 D'autres difficultés rencontrées étaient:
-
 
 - Le manque de documentation et ressources sur le développement d'un OS (par rapport à d'autres domaines de la programmation).
 - le déboggage difficile, comme par example pour le driver _PS2_ et l'affichage _VBE_.
@@ -625,25 +1105,13 @@ D'autres difficultés rencontrées étaient:
 
 Mais ces difficultés nous ont permit d'évoluer des compétences liées à l'informatique, comme:
 
-
 - Savoir lire la documentation officielle et s'aider des ressources sur internet.
 - Comprendre le bas niveau et le fonctionnement de la machine.
 - pouvoir écrire de l'_assembleur_ et comprendre son lien avec le langage _C_.
 - débogger sans avoir accès à un déboggeur moderne et en partie sans affichage.
 
-
 Aussi des compétences liées au travail:
-
 
 - Savoir s'organiser
 - Apprendre à travailler en équipe et se partager les tâches
 - Gérer le temps réparti et faire le mieux de celui-ci
-
-
-
-**_"Hey now, you're an all star, Get your game on, go play"_            -Shrek**
-
-
-
-
-
